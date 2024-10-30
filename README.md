@@ -1,9 +1,10 @@
-## About LaravelFresh
+## Al-Umm
 
-A TALL stack admin panel starter kit. 
+Sistem Induk Ma'had Al-Imam Asy-Syathiby
 
 ## Installation
-This started can be used with Laravel 8+, Laravel Livewire 2.5.4+ and AlpineJS 3+.
+
+This project based of a TALL stack admin panel starter kit. This started can be used with Laravel 8+, Laravel Livewire 2.5.4+ and AlpineJS 3+.
 
 ```
 git clone https://github.com/mithicher/laravel-fresh.git
