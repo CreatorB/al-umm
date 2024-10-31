@@ -38,6 +38,82 @@ php artisan migrate --seed
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Alpine.JS](https://alpinejs.dev/)
 
+## Hosting
+
+```
+composer install --optimize-autoloader --no-dev
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+chmod -R 775 storage
+chmod -R 775 bootstrap/cache
+
+ln -s ../storage/app/public public/storage
+
+#optional
+chmod -R 755 /path/to/your/laravel/public
+find /path/to/your/laravel/public -type f -exec chmod 644 {} \;
+
+```
+
+.htaccess @ public directory
+```
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+```
+
+.htaccess @ root directory
+```
+# Redirect all requests to the /public folder
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ public/ [L]
+    RewriteRule (.*) public/$1 [L]
+</IfModule>
+```
+
+## Contributing
+
+We welcome contributions from the community to help improve Syathiby Mail. To contribute, please follow these steps:
+
+1. **Fork the Repository**:
+   - Click the "Fork" button at the top right of the repository page.
+
+2. **Clone Your Fork**:
+   ```bash
+   git clone https://github.com/CreatorB/al-umm.git
+   cd al-umm
+   ```
+
+3. **Create a New Branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. **Make Your Changes**:
+   - Implement your feature or bug fix.
+   - Ensure that your code follows the project's coding standards.
+
+5. **Commit Your Changes**:
+   ```bash
+   git commit -m "Add your commit message here"
+   ```
+
+6. **Push to Your Fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+7. **Create a Pull Request**:
+   - Go to the original repository and click the "New Pull Request" button.
+   - Select your branch and submit the pull request.
+
 ## License
 
 It is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
