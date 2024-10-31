@@ -3,14 +3,13 @@
        <!-- Optional: Circle Background -->
        <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.1"/>
        
-       <path d="M20 35 
-                v20 
+       <path d="M27 35 
+                v25 
                 h15
-                v-20
+                v-25
                 l15 25 
                 l15 -25
-                v20
-                h15" 
+                v25"
              stroke="currentColor" 
              stroke-width="4" 
              fill="none"

@@ -70,6 +70,9 @@ find /path/to/your/laravel/public -type f -exec chmod 644 {} \;
 
 .htaccess @ root directory
 ```
+# unindex search engine
+User-agent: *
+Disallow: /
 # Redirect all requests to the /public folder
 <IfModule mod_rewrite.c>
     RewriteEngine On
