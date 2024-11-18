@@ -8,13 +8,17 @@
 			<x-iconic-home class="mr-4 stroke-current text-gray-300 w-6 h-6"/>Home
 		</x-nav-item>
 
+		@if(auth()->user()->hasAnyRole(['superadmin', 'admin', 'hr']))
 		<x-nav-item to="{{ route('users') }}" class="flex items-center py-2 text-gray-100">
 			<x-iconic-user class="mr-4 stroke-current text-gray-300 w-6 h-6"/>Users
 		</x-nav-item>
+		@endif
 
+		@if(auth()->user()->hasAnyRole(['superadmin', 'admin', 'hr']))
 		<x-nav-item to="{{ route('roles') }}" class="flex items-center py-2 text-gray-100">
 			<x-iconic-lock class="mr-4 stroke-current text-gray-300 w-6 h-6"/>Roles
 		</x-nav-item>
+		@endif
 
 		<x-nav-item to="{{ route('events.create') }}" class="flex items-center py-2 text-gray-100">
 			<x-iconic-calendar class="mr-4 stroke-current text-gray-300 w-6 h-6"/>Events

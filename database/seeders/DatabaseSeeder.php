@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,10 +14,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        \App\Models\User::factory(10)->create();
+        $this->createUserWithRole('superadmin@syathiby.id', 'superadmin');
+        $this->createUserWithRole('admin@syathiby.id', 'admin');
+        $this->createUserWithRole('hr@syathiby.id', 'hr');
+        $this->createUserWithRole('manager@syathiby.id', 'manager');
+        $this->createUserWithRole('employee@syathiby.id', 'employee');
+
+        \App\Models\User::factory(3)->create();
 
         $this->call([
             RoleAndPermissionsSeeder::class
         ]);
+    }
+    private function createUserWithRole(string $email, string $roleName)
+    {
+        $user = \App\Models\User::create([
+            'name' => ucfirst($roleName),
+            'email' => $email,
+            'password' => bcrypt('bismillahi'),
+        ]);
+
+        $role = Role::where('name', $roleName)->first();
+        if ($role) {
+            $user->assignRole($role);
+        }
     }
 }
