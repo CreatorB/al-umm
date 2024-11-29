@@ -81,6 +81,40 @@ Disallow: /
 </IfModule>
 ```
 
+## Dockering
+
+### initial setup
+
+```
+docker run -d -p 8001:8000 -p 8003:80 -p 8005:3306 -v /home/creatorbe/dev:/var/www/html/dev --name dev lampn
+
+docker exec -it dev bash
+
+composer install
+
+npm install
+
+cp .env.example .env
+
+php artisan key:generate
+
+php artisan migrate --seed
+
+php artisan serve --host=0.0.0.0
+
+npm run dev
+```
+
+### sql setup
+
+```
+CREATE USER 'root'@'172.17.0.1' IDENTIFIED BY '';
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.17.0.1';
+
+FLUSH PRIVILEGES;
+```
+
 ## Contributing
 
 We welcome contributions from the community to help improve Syathiby Mail. To contribute, please follow these steps:

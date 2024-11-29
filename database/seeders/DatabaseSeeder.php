@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(RoleAndPermissionsSeeder::class);
+
         $this->createUserWithRole('superadmin@syathiby.id', 'superadmin');
         $this->createUserWithRole('admin@syathiby.id', 'admin');
         $this->createUserWithRole('hr@syathiby.id', 'hr');
@@ -21,11 +23,8 @@ class DatabaseSeeder extends Seeder
         $this->createUserWithRole('employee@syathiby.id', 'employee');
 
         \App\Models\User::factory(3)->create();
-
-        $this->call([
-            RoleAndPermissionsSeeder::class
-        ]);
     }
+
     private function createUserWithRole(string $email, string $roleName)
     {
         $user = \App\Models\User::create([
