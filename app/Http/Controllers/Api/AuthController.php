@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends ApiController
 {
