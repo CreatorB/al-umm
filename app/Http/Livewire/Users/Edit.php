@@ -7,6 +7,8 @@ use App\Rules\CheckValidPhoneNumber;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class Edit extends Component
 {
@@ -15,12 +17,19 @@ class Edit extends Component
     public $role = '';
     public $gender = 'male';
     public $phone;
-
     public $user;
 
-    public function mount(User $user) 
+    public $confirmingUserDeletion = false;
+
+    public function mount(User $user)
     {
-        $this->user =$user->load('roles');
+        // Log::info('Mounting user', ['user' => $user]);
+        $this->user = $user->load('roles');
+
+        // Log::info('User loaded with roles', [
+        //     'user_id' => $this->user->id,
+        //     'roles' => $this->user->roles->pluck('name')->toArray(),
+        // ]);
 
         $this->name = $this->user->name;
         $this->email = $this->user->email;
@@ -30,13 +39,13 @@ class Edit extends Component
         $this->role = $this->user->roles()->pluck('id')[0] ?? '';
     }
 
-    public function update() 
+    public function update()
     {
         $this->validate([
             'name' => ['required'],
             'email' => [
-                'required', 
-                'email', 
+                'required',
+                'email',
                 Rule::unique('users')->ignore($this->user->id),
             ],
             'role' => ['required'],
@@ -57,13 +66,73 @@ class Edit extends Component
         $this->bannerMessage('User updated.');
     }
 
-    public function getRolesProperty() 
+    public function getRolesProperty()
     {
         return Role::pluck('name', 'id');
     }
 
     public function render()
     {
-        return view('livewire.users.edit');
+        // return view('livewire.users.edit');
+        // Log::info('Rendering component with user', ['user' => $this->user]);
+        return view('livewire.users.edit', [
+            'user' => $this->user,
+            'confirmingUserDeletion' => $this->confirmingUserDeletion,
+        ]);
+    }
+
+    public function confirmDelete()
+    {
+        Log::info('Confirm delete method called');
+
+        // Log::info('Confirm delete method called', [
+        //     'user_id' => $this->user->id,
+        //     'current_user_id' => Auth::id(),
+        //     'has_delete_permission' => Auth::user()->can('delete users')
+        // ]);
+
+        // $this->confirmingUserDeletion = true;
+        // Log::info('Confirm deletion flag set', [
+        //     'confirming_deletion' => $this->confirmingUserDeletion
+        // ]);
+    }
+
+    public function deleteUser(User $user)
+    {
+        Log::info('Delete user method called', [
+            'user_id' => $user->id,
+            'current_user_id' => Auth::id(),
+            'has_delete_permission' => Auth::user()->can('delete users')
+        ]);
+
+        if (!Auth::user()->can('delete users')) {
+            Log::error('User does not have permission to delete');
+            session()->flash('error', 'Anda tidak memiliki izin menghapus user.');
+            return redirect()->back();
+        }
+
+        if ($user->id == Auth::id()) {
+            Log::error('User tried to delete their own account');
+            session()->flash('error', 'Anda tidak dapat menghapus akun sendiri.');
+            return redirect()->back();
+        }
+
+        if ($user->hasRole('superadmin')) {
+            Log::error('User tried to delete a superadmin');
+            session()->flash('error', 'Tidak dapat menghapus user super admin.');
+            return redirect()->back();
+        }
+
+        Log::info('Deleting user', ['user_id' => $user->id]);
+        $user->delete();
+
+        Log::info('User deleted successfully', ['user_id' => $user->id]);
+        return redirect()->route('users.index')
+            ->with('success', 'User berhasil dihapus.');
+    }
+
+    public function cancelDelete()
+    {
+        $this->confirmingUserDeletion = false;
     }
 }

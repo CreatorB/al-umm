@@ -28,6 +28,9 @@ Route::view('dashboard', 'dashboard')->middleware(['auth'])->name('dashboard');
 Route::get('/users', Users\Index::class)->middleware(['auth'])->name('users');
 Route::get('/users/create', Users\Create::class)->middleware(['auth'])->name('users.create');
 Route::get('/users/{user}/edit', Users\Edit::class)->middleware(['auth'])->name('users.edit');
+Route::post('/users/{user}/delete', Users\Edit::class . '@deleteUser')
+    ->middleware(['auth'])
+    ->name('users.destroy');
 
 // Profile
 Route::view('profile', 'profile')->middleware(['auth'])->name('profile');

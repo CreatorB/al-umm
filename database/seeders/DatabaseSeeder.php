@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(DepartmentsAndPartsSeeder::class);
+
         $this->call(RoleAndPermissionsSeeder::class);
 
         $this->createUserWithRole('superadmin@syathiby.id', 'superadmin');

@@ -13,8 +13,10 @@ return new class extends Migration {
                 ->nullable()
                 ->default(null);
             $table->string('nip')->nullable();
-            $table->string('jabatan')->nullable();
-            $table->string('bagian')->nullable();
+            $table->integer('working_days')->nullable();
+            $table->integer('jumlah_cuti')->nullable();
+            $table->foreignId('jabatan_id')->nullable()->constrained('departments'); 
+            $table->foreignId('bagian_id')->nullable()->constrained('parts');
             $table->string('lokasi_kerja')->nullable();
             $table->date('tgl_mulai')->nullable();
             $table->date('tgl_berhenti')->nullable();
@@ -48,6 +50,9 @@ return new class extends Migration {
             $table->string('t_anak')->nullable();
             $table->string('bonus_sanad')->nullable();
             $table->string('diniyyah')->nullable();
+            $table->enum('status', [
+                'active', 'inactive' 
+            ])->default('inactive');
         });
     }
 
@@ -57,6 +62,8 @@ return new class extends Migration {
             $table->dropColumn([
                 'api_token',
                 'nip',
+                'working_days',
+                'jumlah_cuti',
                 'jabatan',
                 'bagian',
                 'lokasi_kerja',
@@ -91,7 +98,8 @@ return new class extends Migration {
                 't_kehadiran',
                 't_anak',
                 'bonus_sanad',
-                'diniyyah'
+                'diniyyah',
+                'status'
             ]);
         });
     }

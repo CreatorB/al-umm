@@ -113,6 +113,8 @@ CREATE USER 'root'@'172.17.0.1' IDENTIFIED BY '';
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.17.0.1';
 
 FLUSH PRIVILEGES;
+
+CREATE DATABASE fresh;
 ```
 
 ## Contributing
