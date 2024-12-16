@@ -10,6 +10,7 @@
 		'black' => 'bg-gray-700 border-transparent hover:bg-gray-800 text-white focus:ring-gray-500',
 		'white' => 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50 focus:ring-indigo-500',
 		'red' => 'bg-red-600 border-transparent hover:bg-red-500 text-white focus:ring-red-500',
+		'gray' => 'bg-gray-300 hover:bg-gray-400 text-black',
 	][$color];
 @endphp
 

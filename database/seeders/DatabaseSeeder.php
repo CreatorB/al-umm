@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             'name' => ucfirst($roleName),
             'email' => $email,
             'password' => bcrypt('bismillahi'),
+            'status' => 'active'
         ]);
 
         $role = Role::where('name', $roleName)->first();

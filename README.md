@@ -22,6 +22,12 @@ Configure the database with your credentials
 php artisan migrate --seed
 ```
 
+Useful commands in development
+
+```
+php artisan view:clear && php artisan optimize:clear && rm -rf storage/framework/views/*
+```
+
 ## Features:
 
 - Reusable Blade Components

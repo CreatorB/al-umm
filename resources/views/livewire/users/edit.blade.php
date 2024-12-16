@@ -1,4 +1,9 @@
 <div>
+    <script>
+        Livewire.on('notify', (type, message) => {
+            alert(message); // Replace with your custom notification UI
+        });
+    </script>
     <x-slot name="title">Edit User</x-slot>
 
     <x-slot name="topbar">
@@ -9,10 +14,6 @@
                     <x-breadcrumb-item>{{ $user->name }}</x-breadcrumb-item>
                 </x-breadcrumb>
             </x-slot>
-            <x-button color="red" wire:click="confirmDelete" class="flex items-center">
-                <x-iconic-trash class="w-5 h-5 mr-2 -ml-1" />
-                Delete User
-            </x-button>
         </x-navbar-top>
     </x-slot>
 
@@ -36,8 +37,7 @@
                 <x-label for="gender-input" class="mb-1">Gender</x-label>
 
                 <div class="space-y-2">
-                    <x-radio label="Male" id="male" name="gender" value="male" wire:model.defer="gender"
-                        checked />
+                    <x-radio label="Male" id="male" name="gender" value="male" wire:model.defer="gender" />
                     <x-radio label="Female" id="female" name="gender" value="female" wire:model.defer="gender" />
                 </div>
 
@@ -47,31 +47,41 @@
             <x-input-number type="tel" label="Phone" name="phone" wire:model.defer="phone" />
 
             <x-slot name="footer">
-                <div class="mr-4">
-                    <x-inline-toastr on="saved">Saved.</x-inline-toastr>
-                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="mr-4">
+                            <x-inline-toastr on="saved">Saved.</x-inline-toastr>
+                        </div>
 
-                <x-button color="black" with-spinner wire:target="update">Save</x-button>
+                        <x-button color="black" with-spinner wire:target="update">Save</x-button>
+                    </div>
+                </div>
             </x-slot>
         </x-card-form>
 
+        @if (auth()->user()->hasAnyRole(['superadmin', 'admin']))
+            <x-card class="flex justify-end">
+                <div class="flex items-center space-x-4">
+                    {{-- <x-users-user-status-switch :status="$user->status" /> --}}
+                    {{-- <livewire:users.user-status-switch :status="$user->status" /> --}}
+                    <livewire:users.user-status-switch :status="$user->status" :user-id="$user->id" />
+                    <x-button color="red" wire:click="$set('confirmingUserDeletion', true)">Delete User</x-button>
+                </div>
+            </x-card>
+        @endif
         @if ($confirmingUserDeletion)
-            <div class="modal show" style="display: block;">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Confirm User Deletion</h5>
-                            <button type="button" class="btn-close" wire:click="cancelDelete"></button>
-                        </div>
-                        <div class="modal-body">
-                            Are you sure you want to delete user {{ $user->name }}?<br>
-                            This action cannot be undone.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" wire:click="cancelDelete">Cancel</button>
-                            <button type="button" class="btn btn-danger"
-                                wire:click="deleteUser({{ $user->id }})">Delete User</button>
-                        </div>
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="w-1/3 bg-white rounded-lg shadow-lg">
+                    <div class="p-4 border-b">
+                        <h5 class="text-lg font-bold">Confirm User Deletion</h5>
+                    </div>
+                    <div class="p-4">
+                        <p>Are you sure you want to delete user {{ $user->name }}?</p>
+                        <p class="text-sm text-gray-600">This action cannot be undone.</p>
+                    </div>
+                    <div class="flex justify-end p-4 space-x-2 border-t">
+                        <x-button color="gray" wire:click="$set('confirmingUserDeletion', false)">Cancel</x-button>
+                        <x-button color="red" wire:click="deleteUser({{ $user->id }})">Delete User</x-button>
                     </div>
                 </div>
             </div>

@@ -35,9 +35,17 @@ class Edit extends Component
         $this->email = $this->user->email;
         $this->gender = $this->user->gender ?? 'male';
         $this->phone = $this->user->phone ?? null;
+        $this->status = $this->user->status;
 
         $this->role = $this->user->roles()->pluck('id')[0] ?? '';
     }
+
+    // public function updatedStatus($value)
+    // {
+    //     $this->user->status = $value ? 'active' : 'inactive';
+    //     $this->user->save();
+    //     $this->bannerMesage('Status user berhasil diubah.');
+    // }
 
     public function update()
     {
@@ -81,54 +89,53 @@ class Edit extends Component
         ]);
     }
 
-    public function confirmDelete()
-    {
-        Log::info('Confirm delete method called');
+    // public function confirmDelete()
+    // {
+    //     Log::info('Confirm delete method called', [
+    //         'user_id' => $this->user->id,
+    //         'current_user_id' => Auth::id(),
+    //         'has_delete_permission' => Auth::user()->can('delete users')
+    //     ]);
 
-        // Log::info('Confirm delete method called', [
-        //     'user_id' => $this->user->id,
-        //     'current_user_id' => Auth::id(),
-        //     'has_delete_permission' => Auth::user()->can('delete users')
-        // ]);
-
-        // $this->confirmingUserDeletion = true;
-        // Log::info('Confirm deletion flag set', [
-        //     'confirming_deletion' => $this->confirmingUserDeletion
-        // ]);
-    }
+    //     $this->confirmingUserDeletion = true;
+    //     Log::info('Confirm deletion flag set', [
+    //         'confirming_deletion' => $this->confirmingUserDeletion
+    //     ]);
+    // }
 
     public function deleteUser(User $user)
     {
         Log::info('Delete user method called', [
             'user_id' => $user->id,
             'current_user_id' => Auth::id(),
+            'current_user_role' => Auth::user()->roles()->pluck('name')->first(),
             'has_delete_permission' => Auth::user()->can('delete users')
         ]);
 
-        if (!Auth::user()->can('delete users')) {
-            Log::error('User does not have permission to delete');
-            session()->flash('error', 'Anda tidak memiliki izin menghapus user.');
+        $role = Auth::user()->roles()->pluck('name')->first();
+        if (!in_array($role, ['superadmin', 'admin'])) {
+            Log::error('User does not have permission to delete', ['current_user_role' => $role]);
+            $this->bannerMessage('Anda tidak memiliki izin menghapus user.', 'danger');
             return redirect()->back();
         }
 
         if ($user->id == Auth::id()) {
             Log::error('User tried to delete their own account');
-            session()->flash('error', 'Anda tidak dapat menghapus akun sendiri.');
-            return redirect()->back();
+            $this->bannerMessage('Anda tidak dapat menghapus akun sendiri', 'danger');
+            return;
         }
 
         if ($user->hasRole('superadmin')) {
             Log::error('User tried to delete a superadmin');
-            session()->flash('error', 'Tidak dapat menghapus user super admin.');
-            return redirect()->back();
+            $this->bannerMessage('Tidak dapat menghapus user super admin', 'danger');
+            return;
         }
 
         Log::info('Deleting user', ['user_id' => $user->id]);
         $user->delete();
 
         Log::info('User deleted successfully', ['user_id' => $user->id]);
-        return redirect()->route('users.index')
-            ->with('success', 'User berhasil dihapus.');
+        return redirect()->route('users');
     }
 
     public function cancelDelete()
