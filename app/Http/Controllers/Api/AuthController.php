@@ -6,6 +6,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Log;
 use Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -58,6 +59,10 @@ class AuthController extends ApiController
 
             if (!$user || !Hash::check($validated['password'], $user->password)) {
                 return $this->errorResponse('Invalid credentials', Response::HTTP_UNAUTHORIZED);
+            }
+
+            if ($user->status != 'active') {
+                return $this->errorResponse('Your account is not active', Response::HTTP_UNAUTHORIZED);
             }
 
             // Generate API token
