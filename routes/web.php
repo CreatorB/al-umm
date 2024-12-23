@@ -3,6 +3,7 @@
 use App\Http\Livewire\Roles;
 use App\Http\Livewire\Users;
 use App\Http\Livewire\Events;
+use App\Http\Livewire\Attendances;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Welcome page
-Route::get('/', function() {
+Route::get('/', function () {
 	return view('welcome');
 });
 
@@ -39,4 +40,8 @@ Route::get('/events/create', Events\Create::class)->name('events.create');
 Route::get('/roles', Roles\Index::class)->middleware(['auth'])->name('roles');
 Route::get('/roles/{role}', Roles\Edit::class)->middleware(['auth'])->name('roles.edit');
 
-require __DIR__.'/auth.php';
+Route::get('/attendances/tapping', Attendances\Tapping::class)->name('attendances.tapping');
+// Route::post('/attendances/toggle', [Attendances\Tapping::class, 'toggle'])->name('attendances.toggle');
+
+
+require __DIR__ . '/auth.php';

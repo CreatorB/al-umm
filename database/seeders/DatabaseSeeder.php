@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
         $this->createUserWithRole('employee@syathiby.id', 'employee');
 
         \App\Models\User::factory(3)->create();
+
+        $this->call(PermitSeeder::class);
     }
 
     private function createUserWithRole(string $email, string $roleName)

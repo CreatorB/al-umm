@@ -26,7 +26,7 @@
 		</div>
 
 		<div class="px-5 py-4 bg-gray-50 rounded-b-lg text-right flex justify-end items-center">
-			{{ $footer }}
+			{{ $footer ?? '' }}
 		</div>
 
 		@if($formAction)
