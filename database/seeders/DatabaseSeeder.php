@@ -35,7 +35,11 @@ class DatabaseSeeder extends Seeder
             'name' => ucfirst($roleName),
             'email' => $email,
             'password' => bcrypt('bismillahi'),
-            'status' => 'active'
+            'status' => 'active',
+            'working_days' => '27',
+            'working_time_start' => '08:00',
+            'working_time_end' => '16:00',
+            'nip' => '1345121',
         ]);
 
         $role = Role::where('name', $roleName)->first();

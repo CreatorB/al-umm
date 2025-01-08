@@ -4,6 +4,7 @@ use App\Http\Livewire\Roles;
 use App\Http\Livewire\Users;
 use App\Http\Livewire\Events;
 use App\Http\Livewire\Attendances;
+use App\Http\Livewire\Admin;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,8 +41,11 @@ Route::get('/events/create', Events\Create::class)->name('events.create');
 Route::get('/roles', Roles\Index::class)->middleware(['auth'])->name('roles');
 Route::get('/roles/{role}', Roles\Edit::class)->middleware(['auth'])->name('roles.edit');
 
-Route::get('/attendances/tapping', Attendances\Tapping::class)->name('attendances.tapping');
+Route::get('/attendances/tapping', Attendances\Tapping::class)->middleware(['auth'])->name('attendances.tapping');
+Route::get('/attendances/perizinan', Attendances\Perizinan::class)->middleware(['auth'])->name('attendances.perizinan');
 // Route::post('/attendances/toggle', [Attendances\Tapping::class, 'toggle'])->name('attendances.toggle');
+
+Route::get('/admin/export-absen', Admin\Export::class)->middleware(['auth'])->name('admin.export-absen');
 
 
 require __DIR__ . '/auth.php';

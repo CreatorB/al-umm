@@ -14,6 +14,8 @@ return new class extends Migration {
                 ->default(null);
             $table->string('nip')->nullable();
             $table->integer('working_days')->nullable();
+            $table->time('working_time_start')->nullable();
+            $table->time('working_time_end')->nullable();
             $table->integer('jumlah_cuti')->nullable();
             $table->foreignId('jabatan_id')->nullable()->constrained('departments'); 
             $table->foreignId('bagian_id')->nullable()->constrained('parts');

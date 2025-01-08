@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -50,8 +51,13 @@ class User extends Authenticatable
         'photo_url'
     ];
 
-    public function getPhotoUrlAttribute() 
+    public function getPhotoUrlAttribute()
     {
         return $this->photo ? Storage::disk('public')->url($this->photo) : null;
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
     }
 }
