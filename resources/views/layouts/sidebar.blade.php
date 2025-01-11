@@ -54,7 +54,7 @@
             </div>
         </x-nav-item>
 
-        {{-- @if (auth()->user()->hasAnyRole(['superadmin', 'admin', 'hr'])) --}}
+        @if (auth()->user()->hasAnyRole(['superadmin', 'admin', 'hr']))
         <x-nav-item no-margin>
             <div class="flex flex-col text-gray-100">
                 <div class="flex items-center py-1 cursor-pointer" onclick="toggleSubMenu('export-menu')">
@@ -74,7 +74,7 @@
                 </ul>
             </div>
         </x-nav-item>
-        {{-- @endif --}}
+        @endif
 
         <div class="my-3"></div>
 

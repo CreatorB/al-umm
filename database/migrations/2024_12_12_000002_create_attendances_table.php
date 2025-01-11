@@ -19,7 +19,8 @@ class CreateAttendancesTable extends Migration
             $table->enum('status', [
                 'hadir', 'sakit', 'izin', 'tugas_luar', 'cuti', 'alpha'
             ])->default('hadir');
-            $table->boolean('is_overtime')->default(false); 
+            $table->timestamp('over_time_in')->nullable(); 
+            $table->timestamp('over_time_out')->nullable(); 
             $table->foreignId('permit_id')->nullable()->constrained(); 
             $table->text('notes')->nullable(); 
             $table->timestamps();

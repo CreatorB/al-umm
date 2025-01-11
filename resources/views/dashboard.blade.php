@@ -10,14 +10,27 @@
     </x-slot>
 
     <x-section-centered>
+        @if (session()->has('error'))
+            <div class="relative px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded alert-danger">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline">{{ session('error') }}</span>
+            </div>
+        @endif
+        @if (session()->has('success'))
+            <div
+                class="relative px-4 py-3 mb-4 text-green-700 bg-green-100 border border-green-400 rounded alert-success">
+                <strong class="font-bold">Success!</strong>
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
         <x-grid mobile="1" tablet="3" laptop="3" desktop="3" gap="6">
             <div class="md:col-span-2">
 
                 <x-heading class="mb-1" size="xl">Grid</x-heading>
                 <x-grid mobile="1" tablet="2" laptop="3" desktop="3" gap="6">
-                    <div class="h-16 bg-white shadow rounded-lg"></div>
-                    <div class="h-16 bg-white shadow rounded-lg"></div>
-                    <div class="h-16 bg-white shadow rounded-lg"></div>
+                    <div class="h-16 bg-white rounded-lg shadow"></div>
+                    <div class="h-16 bg-white rounded-lg shadow"></div>
+                    <div class="h-16 bg-white rounded-lg shadow"></div>
                 </x-grid>
 
                 <br><br>
@@ -28,7 +41,8 @@
                 <x-heading class="mb-1" size="xl">Copy to Clipboard</x-heading>
                 <x-copytoclipboard content="Welcome to Laravel Fresh" />
                 <br>
-                <x-copytoclipboard content='<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <x-copytoclipboard
+                    content='<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M12 14l9-5-9-5-9 5 9 5z" />
                     <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />

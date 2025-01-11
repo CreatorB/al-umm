@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->string('tempat_lahir')->nullable();
             $table->date('tanggal_lahir')->nullable();
             $table->string('pendidikan')->nullable();
+            $table->string('gelar')->nullable();
             $table->string('jurusan')->nullable();
             $table->string('sekolah_universitas')->nullable();
             $table->integer('tahun_lulus_1')->nullable();
@@ -65,6 +66,8 @@ return new class extends Migration {
                 'api_token',
                 'nip',
                 'working_days',
+                'working_time_start',
+                'working_time_end',
                 'jumlah_cuti',
                 'jabatan',
                 'bagian',
@@ -74,6 +77,7 @@ return new class extends Migration {
                 'tempat_lahir',
                 'tanggal_lahir',
                 'pendidikan',
+                'gelar',
                 'jurusan',
                 'sekolah_universitas',
                 'tahun_lulus_1',

@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             'working_time_start' => '08:00',
             'working_time_end' => '16:00',
             'nip' => '1345121',
+            'jumlah_cuti' => '3',
         ]);
 
         $role = Role::where('name', $roleName)->first();
