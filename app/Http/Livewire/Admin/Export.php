@@ -277,7 +277,8 @@ class Export extends Component
             $waktuLemburFormatted = $this->convertMinutesToTime($totalWaktuLembur);
 
             $cutiDiambil = $user->attendances->where('status', 'cuti')->count();
-            $sisaSaatIni = $user->jumlah_cuti - $cutiDiambil;
+            $sisaSaatIni = $user->jumlah_cuti;
+            $sisaSebelumnya = $sisaSaatIni + $cutiDiambil;
 
             $sheet->setCellValue('A' . $row, $user->nip);
             $sheet->setCellValue('B' . $row, $user->name);
@@ -292,7 +293,7 @@ class Export extends Component
             $sheet->setCellValue('K' . $row, $tugasLuar);
             $sheet->setCellValue('L' . $row, $alpha);
             $sheet->setCellValue('M' . $row, $cutiDiambil);
-            $sheet->setCellValue('N' . $row, $user->jumlah_cuti);
+            $sheet->setCellValue('N' . $row, $sisaSebelumnya);
             $sheet->setCellValue('O' . $row, $sisaSaatIni);
             $sheet->setCellValue('P' . $row, $lemburCount);
             $sheet->setCellValue('Q' . $row, $waktuLemburFormatted);
