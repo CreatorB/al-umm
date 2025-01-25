@@ -45,11 +45,11 @@ class Export extends Component
             $workStartTime = Carbon::parse($attendance->attendance_date . ' ' . $schedule->start_time);
             $workEndTime = Carbon::parse($attendance->attendance_date . ' ' . $schedule->end_time);
 
-            if ($checkInTime->gt($workStartTime)) { 
+            if ($checkInTime->gt($workStartTime)) {
                 $totalLateMinutes += $checkInTime->diffInMinutes($workStartTime);
             }
 
-            if ($checkOutTime->lt($workEndTime)) { 
+            if ($checkOutTime->lt($workEndTime)) {
                 $totalEarlyLeaveMinutes += $workEndTime->diffInMinutes($checkOutTime);
             }
         }
@@ -81,20 +81,20 @@ class Export extends Component
         $sheet->setCellValue('B1', 'NAMA PEGAWAI');
         $sheet->setCellValue('C1', 'BAGIAN');
 
-        $col = 'D'; 
+        $col = 'D';
         $currentDate = $startDate->copy();
 
         while ($currentDate->lte($endDate)) {
-            $sheet->setCellValue($col . '1', $currentDate->day); 
+            $sheet->setCellValue($col . '1', $currentDate->day);
 
-            $hari = $currentDate->isoFormat('dddd'); 
-            $sheet->setCellValue($col . '2', strtoupper(substr($hari, 0, 3))); 
+            $hari = $currentDate->isoFormat('dddd');
+            $sheet->setCellValue($col . '2', strtoupper(substr($hari, 0, 3)));
 
             $col++;
             $currentDate->addDay();
         }
 
-        $row = 3; 
+        $row = 3;
         $users = User::with([
             'attendances' => function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('attendance_date', [$startDate, $endDate]);
@@ -106,21 +106,37 @@ class Export extends Component
             $sheet->setCellValue('B' . $row, $user->name);
             $sheet->setCellValue('C' . $row, $user->bagian);
 
-            $col = 'D'; 
+            $col = 'D';
             $currentDate = $startDate->copy();
             while ($currentDate->lte($endDate)) {
-                $attendance = $user->attendances->firstWhere('attendance_date', $currentDate->toDateString());
-                if ($attendance) {
-                    $checkIn = $attendance->check_in ? Carbon::parse($attendance->check_in)->format('H:i') : '0';
-                    $checkOut = $attendance->check_out ? Carbon::parse($attendance->check_out)->format('H:i') : '0';
-                    if ($attendance->over_time_in) {
-                        $overtimeIn = $attendance->over_time_in ? Carbon::parse($attendance->over_time_in)->format('H:i') : '0';
-                        $overtimeOut = $attendance->over_time_out ? Carbon::parse($attendance->over_time_out)->format('H:i') : '0';
-                        $sheet->setCellValue($col . $row, $checkIn . ' - ' . $checkOut . ' (Lembur : ' . $overtimeIn . ' - ' . $overtimeOut . ')');
-                    } else {
-                        $sheet->setCellValue($col . $row, $checkIn . ' - ' . $checkOut);
+                // Ambil semua attendance untuk tanggal tertentu
+                $attendances = $user->attendances->where('attendance_date', $currentDate->toDateString());
+
+                // Jika ada attendance
+                if ($attendances->isNotEmpty()) {
+                    $attendanceData = [];
+                    foreach ($attendances as $attendance) {
+                        $checkIn = $attendance->check_in ? Carbon::parse($attendance->check_in)->format('H:i') : '0';
+                        $checkOut = $attendance->check_out ? Carbon::parse($attendance->check_out)->format('H:i') : '0';
+
+                        // Tambahkan data check-in dan check-out ke array
+                        if ($checkIn != '0' && $checkOut != '0') {
+                            $attendanceData[] = $checkIn . ' - ' . $checkOut;
+                        }
+
+                        // Jika ada overtime, tambahkan informasi lembur
+                        if ($attendance->over_time_in) {
+                            $overtimeIn = $attendance->over_time_in ? Carbon::parse($attendance->over_time_in)->format('H:i') : '0';
+                            $overtimeOut = $attendance->over_time_out ? Carbon::parse($attendance->over_time_out)->format('H:i') : '0';
+                            $attendanceData[] = '(Lembur: ' . $overtimeIn . ' - ' . $overtimeOut . ')';
+                        }
                     }
+
+                    // Gabungkan data dengan pemisah koma atau baris baru
+                    $sheet->setCellValue($col . $row, implode("\n", $attendanceData)); // Gunakan "\n" untuk baris baru
+                    $sheet->getStyle($col . $row)->getAlignment()->setWrapText(true); // Aktifkan wrap text
                 }
+
                 $col++;
                 $currentDate->addDay();
             }
@@ -142,7 +158,7 @@ class Export extends Component
             'attendances' => function ($query) {
                 $query->whereBetween('attendance_date', [$this->startDate, $this->endDate]);
             },
-            'schedule' 
+            'schedule'
         ])->get();
 
         $spreadsheet = new Spreadsheet();
@@ -190,7 +206,7 @@ class Export extends Component
             $lemburCount = 0;
 
             foreach ($groupedAttendances as $date => $attendances) {
-                $statusCounted = false; 
+                $statusCounted = false;
 
                 $day = Carbon::parse($date)->isoFormat('dddd');
 
@@ -231,7 +247,7 @@ class Export extends Component
                                 $alpha++;
                                 break;
                         }
-                        $statusCounted = true; 
+                        $statusCounted = true;
                     }
 
                     if ($user->schedule) {
