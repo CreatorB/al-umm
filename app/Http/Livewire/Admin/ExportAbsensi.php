@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class Export extends Component
+class ExportAbsensi extends Component
 {
     public $startDate;
     public $endDate;
@@ -144,7 +144,7 @@ class Export extends Component
         }
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'data_absensi_' . now()->format('Y-m-d') . '.xlsx';
+        $fileName = 'al-umm_data_absensi_' . now()->format('Y-m-d') . '.xlsx';
         $writer->save($fileName);
 
         return response()->download($fileName)->deleteFileAfterSend(true);
@@ -301,7 +301,7 @@ class Export extends Component
         }
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'rekap_absen_' . now()->format('Y-m-d') . '.xlsx';
+        $fileName = 'al-umm_rekap_absen_' . now()->format('Y-m-d') . '.xlsx';
         $writer->save($fileName);
 
         return response()->download($fileName)->deleteFileAfterSend(true);

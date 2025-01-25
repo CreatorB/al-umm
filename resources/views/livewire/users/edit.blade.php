@@ -37,8 +37,8 @@
                 <x-label for="gender-input" class="mb-1">Gender</x-label>
 
                 <div class="space-y-2">
-                    <x-radio label="Male" id="male" name="gender" value="male" wire:model.defer="gender" />
-                    <x-radio label="Female" id="female" name="gender" value="female" wire:model.defer="gender" />
+                    <x-radio label="Laki-laki" id="l" name="gender" value="l" wire:model.defer="gender" />
+                    <x-radio label="Perempuan" id="p" name="gender" value="p" wire:model.defer="gender" />
                 </div>
 
                 <x-input-error for="gender" class="mt-1" />

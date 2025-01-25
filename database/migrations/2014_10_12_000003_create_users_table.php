@@ -21,7 +21,10 @@ class CreateUsersTable extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('photo')->nullable();
-            $table->string('gender')->nullable();
+            $table->enum('gender', [
+                'L',
+                'P'
+            ])->nullable();
             $table->string('phone')->nullable();
             $table->string('api_token', 80)->unique()->nullable()->default(null);
             $table->string('nip')->nullable();
@@ -45,7 +48,6 @@ class CreateUsersTable extends Migration
             $table->string('sekolah_universitas_2')->nullable();
             $table->integer('tahun_lulus_2')->nullable();
             $table->text('alamat')->nullable();
-            $table->string('alamat_email')->nullable();
             $table->string('type_pegawai')->nullable();
             $table->string('status_pegawai')->nullable();
             $table->string('ktp_id')->nullable();

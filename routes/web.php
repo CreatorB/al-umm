@@ -45,7 +45,9 @@ Route::get('/attendances/tapping', Attendances\Tapping::class)->middleware(['aut
 Route::get('/attendances/perizinan', Attendances\Perizinan::class)->middleware(['auth'])->name('attendances.perizinan');
 // Route::post('/attendances/toggle', [Attendances\Tapping::class, 'toggle'])->name('attendances.toggle');
 
-Route::get('/admin/export-absen', Admin\Export::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.export-absen');
+Route::get('/admin/export-absen', Admin\ExportAbsensi::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.export-absen');
+
+Route::get('/admin/export-users', Admin\ExportUsers::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.export-users');
 
 
 require __DIR__ . '/auth.php';
