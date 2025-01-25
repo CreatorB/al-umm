@@ -17,6 +17,7 @@ class Attendance extends Model
         'check_in_location',
         'check_out_location',
         'status',
+        'shift',
         'over_time_in',
         'over_time_out',
         'permit_id',
