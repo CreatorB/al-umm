@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,5 +31,9 @@ Route::prefix('v1')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('refresh-token', [AuthController::class, 'refreshToken']);
         Route::apiResource('users', UserController::class);
+
+        Route::post('attendance/check-in', [AttendanceController::class, 'checkIn']);
+        Route::post('attendance/check-out', [AttendanceController::class, 'checkOut']);
+        Route::get('attendance/status', [AttendanceController::class, 'status']);
     });
 });

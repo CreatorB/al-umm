@@ -2,7 +2,7 @@
 
     <x-slot name="topbar">
         <div class="bg-purple-700 text-purple-200 py-2.5 px-4 text-center text-sm">
-            Some new components added and bug fixes done
+            Sistem dalam pengembangan, kritik dan saran, silahkan disampaikan.
         </div>
         <x-navbar-top>
             <x-slot name="title">Home</x-slot>

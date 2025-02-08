@@ -48,11 +48,10 @@ class ExportUsers extends Component
         $sheet->setCellValue('R1', 'Sekolah/Universitas');
         $sheet->setCellValue('S1', 'Tahun Lulus');
         $sheet->setCellValue('T1', 'Alamat');
-        $sheet->setCellValue('U1', 'Alamat Email');
-        $sheet->setCellValue('V1', 'Status Pegawai');
-        $sheet->setCellValue('W1', 'No. Rekening');
-        $sheet->setCellValue('X1', 'Gaji Pokok');
-        $sheet->setCellValue('Y1', 'Status');
+        $sheet->setCellValue('U1', 'Status Pegawai');
+        $sheet->setCellValue('V1', 'No. Rekening');
+        $sheet->setCellValue('W1', 'Gaji Pokok');
+        $sheet->setCellValue('X1', 'Status');
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'al-umm_users_template.xlsx';
@@ -97,11 +96,10 @@ class ExportUsers extends Component
                     'sekolah_universitas' => $row[17] ?? null,
                     'tahun_lulus_1' => $row[18] ?? null,
                     'alamat' => $row[19] ?? null,
-                    'alamat_email' => $row[20] ?? null,
-                    'status_pegawai' => $row[21] ?? null,
-                    'no_rek' => $row[22] ?? null,
-                    'gaji_pokok' => $row[23] ?? null,
-                    'status' => $row[24] ?? 'inactive',
+                    'status_pegawai' => $row[20] ?? null,
+                    'no_rek' => $row[21] ?? null,
+                    'gaji_pokok' => $row[22] ?? null,
+                    'status' => $row[23] ?? 'inactive',
                 ]);
             }
 

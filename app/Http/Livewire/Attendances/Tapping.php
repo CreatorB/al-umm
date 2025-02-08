@@ -18,10 +18,15 @@ class Tapping extends Component
     private $targetLongitude = 106.96255401126793;
     private $maxDistance = 3000;
 
+    public $isInNetwork = false;
+    public $pingTime = null;
+
     protected $listeners = [
         'overtimeConfirmed' => 'handleOvertimeConfirmation',
         'locationRetrieved' => 'locationRetrieved',
         'locationFailed' => 'locationFailed',
+        'checkPing' => 'validateNetwork',
+        'updateDeviceInfo' => 'handleDeviceInfoUpdate'
     ];
 
     public function locationRetrieved($latitude, $longitude)
@@ -40,7 +45,8 @@ class Tapping extends Component
     public function mount()
     {
         $this->checkAttendanceStatus();
-        $this->getUserLocation();
+        // $this->getUserLocation();
+        // $this->validateNetwork();
     }
 
     private function getUserLocation()
@@ -147,12 +153,17 @@ class Tapping extends Component
 
     public function checkIn()
     {
-        $today = Carbon::now()->toDateString();
-
-        if (!$this->latitude || !$this->longitude) {
-            session()->flash('error', 'Lokasi tidak valid. Pastikan izin lokasi diaktifkan.');
+        if (!$this->validateNetwork()) {
+            session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
             return;
         }
+
+        $today = Carbon::now()->toDateString();
+
+        // if (!$this->latitude || !$this->longitude) {
+        //     session()->flash('error', 'Lokasi tidak valid. Pastikan izin lokasi diaktifkan.');
+        //     return;
+        // }
 
         $schedule = $this->getTodaySchedule();
         if (!$schedule) {
@@ -160,12 +171,12 @@ class Tapping extends Component
             return;
         }
 
-        $distance = $this->isWithinRange();
-        if ($distance > $this->maxDistance) {
-            session()->flash('error', 'You are not within the allowed range to check in. Your current location: ' .
-                "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
-            return;
-        }
+        // $distance = $this->isWithinRange();
+        // if ($distance > $this->maxDistance) {
+        //     session()->flash('error', 'You are not within the allowed range to check in. Your current location: ' .
+        //         "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
+        //     return;
+        // }
 
         try {
 
@@ -182,11 +193,15 @@ class Tapping extends Component
 
             $checkInTime = Carbon::now()->format('H:i:s');
 
+            $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info';
+            $connectionInfo = $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected';
+
             $attendanceData = [
                 'user_id' => Auth::id(),
                 'attendance_date' => $today,
                 'check_in' => Carbon::now(),
-                'check_in_location' => "{$this->latitude}, {$this->longitude}",
+                // 'check_in_location' => "{$this->latitude}, {$this->longitude}",
+                'check_in_location' => $deviceDetails,
                 'status' => 'hadir',
                 'shift' => $newShift,
             ];
@@ -210,14 +225,19 @@ class Tapping extends Component
 
     public function checkOut()
     {
-        $today = Carbon::now()->toDateString();
-
-        $distance = $this->isWithinRange();
-        if ($distance > $this->maxDistance) {
-            session()->flash('error', 'You are not within the allowed range to check out. Your current location: ' .
-                "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
+        if (!$this->validateNetwork()) {
+            session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
             return;
         }
+
+        $today = Carbon::now()->toDateString();
+
+        // $distance = $this->isWithinRange();
+        // if ($distance > $this->maxDistance) {
+        //     session()->flash('error', 'You are not within the allowed range to check out. Your current location: ' .
+        //         "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
+        //     return;
+        // }
 
         try {
             $lastAttendance = Attendance::where('user_id', Auth::id())
@@ -237,7 +257,8 @@ class Tapping extends Component
 
                 $updateData = [
                     'check_out' => Carbon::now(),
-                    'check_out_location' => "{$this->latitude}, {$this->longitude}",
+                    // 'check_out_location' => "{$this->latitude}, {$this->longitude}",
+                    'check_out_location' => $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected',
                 ];
 
                 if ($endTime && $checkOutTime > $endTime) {
@@ -256,6 +277,23 @@ class Tapping extends Component
             Log::error('Check Out Error: ' . $e->getMessage());
             session()->flash('error', 'Failed to check out. Please try again.');
         }
+    }
+
+    public function handleDeviceInfoUpdate($info)
+    {
+        $this->deviceInfo = $info;
+        Log::info('Device info updated', ['info' => $info]);
+    }
+    public function validateNetwork()
+    {
+        // Log::info('Validating network. isInNetwork: ' . ($this->isInNetwork ? 'true' : 'false'));
+        if (!$this->isInNetwork) {
+            $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info available';
+            Log::info('Network validation failed', ['device_info' => $deviceDetails]);
+            session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
+            return false;
+        }
+        return true;
     }
 
     public function handleOvertimeConfirmation($isOvertime, $type)

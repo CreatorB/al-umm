@@ -79,6 +79,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'api_token',
+        'schedule_id',
+        'jabatan_id',
+        'bagian_id',
     ];
 
     /**
@@ -108,4 +112,16 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Schedule::class, 'schedule_id');
     }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'jabatan_id');
+    }
+
+    public function part()
+    {
+        return $this->belongsTo(Part::class, 'bagian_id');
+    }
+
+
 }

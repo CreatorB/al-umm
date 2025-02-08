@@ -52,7 +52,7 @@
             <div class="space-x-3 flex mt-5 text-sm">
                 <a href="{{ url('/') }}" class="text-gray-500 underline">Back to home</a>
                 <div class="text-gray-400">/</div>
-                <a href="#" class="text-gray-500 underline">Contact us</a>
+                <a href="https://wa.me/6289619060672" class="text-gray-500 underline">Contact us</a>
             </div>
         </x-slot>
     </x-auth-card>

@@ -23,6 +23,13 @@ Route::get('/', function () {
 	return view('welcome');
 });
 
+// ping
+Route::get('/ping', function() {
+    return response('pong')
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET');
+});
+
 // Dashboard
 Route::view('dashboard', 'dashboard')->middleware(['auth'])->name('dashboard');
 

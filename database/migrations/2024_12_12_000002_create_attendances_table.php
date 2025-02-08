@@ -14,8 +14,8 @@ class CreateAttendancesTable extends Migration
             $table->date('attendance_date');
             $table->timestamp('check_in')->nullable();
             $table->timestamp('check_out')->nullable();
-            $table->string('check_in_location')->nullable();
-            $table->string('check_out_location')->nullable();
+            $table->text('check_in_location')->nullable();
+            $table->text('check_out_location')->nullable();
             $table->enum('status', [
                 'hadir',
                 'sakit',
