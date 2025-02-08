@@ -20,6 +20,7 @@ class Tapping extends Component
 
     public $isInNetwork = false;
     public $pingTime = null;
+    public $deviceInfo = null;
 
     protected $listeners = [
         'overtimeConfirmed' => 'handleOvertimeConfirmation',

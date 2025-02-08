@@ -50,7 +50,6 @@
             ATTENDANCE_SERVER_IP: "{{ config('app.attendance_server_ip') }}"
         };
 
-        // Environment helper function
         function env(key) {
             return window.appConfig[key] || null;
         }
@@ -90,86 +89,79 @@
         }
 
         async function pingServer() {
-            const serverUrl = env('ATTENDANCE_SERVER_IP');
-            if (!serverUrl) {
-                throw new Error('Server URL not configured');
-            }
-
-            console.log(`Pinging local server: ${serverUrl}...`);
-
-            const deviceInfo = await getDeviceInfo();
-
-            return new Promise((resolve, reject) => {
-                const startTime = new Date().getTime();
-
-                // Simple TCP connection check
-                const xhr = new XMLHttpRequest();
-                xhr.timeout = 5000;
-
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        const endTime = new Date().getTime();
-                        const pingTime = endTime - startTime;
-
-                        // Any response means server is reachable
-                        if (xhr.status === 200 || xhr.status === 302 || xhr.status === 404) {
-                            console.log('Local server reachable:', {
-                                pingTime
-                            });
-                            if (typeof Livewire !== 'undefined') {
-                                Livewire.emit('updateDeviceInfo', deviceInfo);
-                                @this.set('isInNetwork', true);
-                                @this.set('pingTime', pingTime);
-                            }
-                            resolve({
-                                success: true,
-                                pingTime,
-                                deviceInfo
-                            });
-                        } else {
-                            handleConnectionError('Server not reachable');
-                        }
-                    }
-                };
-
-                xhr.onerror = function() {
-                    // Even if we get an error, if it's a CORS error it means the server is actually reachable
-                    const endTime = new Date().getTime();
-                    const pingTime = endTime - startTime;
-
-                    console.log('Local server reachable (CORS response):', {
-                        pingTime
-                    });
-                    if (typeof Livewire !== 'undefined') {
-                        Livewire.emit('updateDeviceInfo', deviceInfo);
-                        @this.set('isInNetwork', true);
-                        @this.set('pingTime', pingTime);
-                    }
-                    resolve({
-                        success: true,
-                        pingTime,
-                        deviceInfo
-                    });
-                };
-
-                xhr.ontimeout = function() {
-                    handleConnectionError('Connection timeout');
-                };
-
-                function handleConnectionError(errorMessage) {
-                    console.error('Connection failed:', errorMessage);
-                    if (typeof Livewire !== 'undefined') {
-                        Livewire.emit('updateDeviceInfo', deviceInfo);
-                        @this.set('isInNetwork', false);
-                        @this.set('pingTime', null);
-                    }
-                    reject(new Error(errorMessage));
+            try {
+                const serverUrl = env('ATTENDANCE_SERVER_IP');
+                if (!serverUrl) {
+                    throw new Error('Server URL not configured');
                 }
 
-                // Just try to connect to the IP
-                xhr.open('GET', serverUrl, true);
-                xhr.send();
-            });
+                console.log(`Pinging local server: ${serverUrl}...`);
+
+                // Get device info first, outside the Promise
+                const deviceInfo = await getDeviceInfo();
+
+                return new Promise((resolve, reject) => {
+                    const startTime = new Date().getTime();
+                    const xhr = new XMLHttpRequest();
+                    xhr.timeout = 5000;
+
+                    const handleSuccess = (pingTime) => {
+                        if (typeof Livewire !== 'undefined') {
+                            Livewire.emit('updateDeviceInfo', deviceInfo);
+                            @this.set('isInNetwork', true);
+                            @this.set('pingTime', pingTime);
+                        }
+                        resolve({
+                            success: true,
+                            pingTime,
+                            deviceInfo
+                        });
+                    };
+
+                    const handleError = (errorMessage) => {
+                        console.error('Connection failed:', errorMessage);
+                        if (typeof Livewire !== 'undefined') {
+                            Livewire.emit('updateDeviceInfo', deviceInfo);
+                            @this.set('isInNetwork', false);
+                            @this.set('pingTime', null);
+                        }
+                        reject(new Error(errorMessage));
+                    };
+
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            const endTime = new Date().getTime();
+                            const pingTime = endTime - startTime;
+
+                            if (xhr.status === 200 || xhr.status === 302 || xhr.status === 404) {
+                                console.log('Local server reachable:', {
+                                    pingTime
+                                });
+                                handleSuccess(pingTime);
+                            } else {
+                                handleError('Server not reachable');
+                            }
+                        }
+                    };
+
+                    xhr.onerror = function() {
+                        const endTime = new Date().getTime();
+                        const pingTime = endTime - startTime;
+                        console.log('Local server reachable (CORS response):', {
+                            pingTime
+                        });
+                        handleSuccess(pingTime);
+                    };
+
+                    xhr.ontimeout = () => handleError('Connection timeout');
+
+                    xhr.open('GET', serverUrl, true);
+                    xhr.send();
+                });
+            } catch (error) {
+                console.error('Ping error:', error);
+                throw error;
+            }
         }
 
         // Initialize ping check
