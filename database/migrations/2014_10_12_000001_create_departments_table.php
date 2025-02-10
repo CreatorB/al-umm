@@ -12,7 +12,7 @@ class CreateDepartmentsTable extends Migration
             $table->id();
             $table->string('name'); 
             $table->string('code')->unique(); 
-            $table->foreignId('head_id')->nullable()->constrained('users'); 
+            $table->foreignId('head_id')->nullable(); 
             $table->string('location')->nullable(); 
             $table->text('description')->nullable(); 
             $table->enum('status', ['active', 'inactive'])->default('active');

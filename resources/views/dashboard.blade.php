@@ -2,7 +2,7 @@
 
     <x-slot name="topbar">
         <div class="bg-purple-700 text-purple-200 py-2.5 px-4 text-center text-sm">
-            Some new components added and bug fixes done
+            Sistem dalam pengembangan, kritik dan saran, silahkan disampaikan.
         </div>
         <x-navbar-top>
             <x-slot name="title">Home</x-slot>
@@ -28,9 +28,14 @@
 
                 <x-heading class="mb-1" size="xl">Grid</x-heading>
                 <x-grid mobile="1" tablet="2" laptop="3" desktop="3" gap="6">
-                    <div class="h-16 bg-white rounded-lg shadow"></div>
-                    <div class="h-16 bg-white rounded-lg shadow"></div>
-                    <div class="h-16 bg-white rounded-lg shadow"></div>
+                    <div class="flex items-center justify-center h-16 bg-white rounded-lg shadow">
+                        <button class="w-full h-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                            <a href="/attendances/tapping"
+                                class="flex items-center justify-center block w-full h-full">Absen Masuk</a>
+                        </button>
+                    </div>
+                    {{-- <div class="h-16 bg-white rounded-lg shadow"></div>
+                    <div class="h-16 bg-white rounded-lg shadow"></div> --}}
                 </x-grid>
 
                 <br><br>

@@ -71,6 +71,11 @@
                             <x-iconic-arrow-right class="w-4 h-4 mr-2 text-gray-300 stroke-current" />Absen
                         </x-nav-item>
                     </li>
+                    <li>
+                        <x-nav-item to="{{ route('admin.export-users') }}" class="flex items-center py-1 text-gray-100">
+                            <x-iconic-arrow-right class="w-4 h-4 mr-2 text-gray-300 stroke-current" />Users
+                        </x-nav-item>
+                    </li>
                 </ul>
             </div>
         </x-nav-item>
