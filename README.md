@@ -7,7 +7,9 @@ Sistem Induk Ma'had Al-Imam Asy-Syathiby
 This project based of a TALL stack admin panel starter kit. This started can be used with Laravel 8+, Laravel Livewire 2.5.4+ and AlpineJS 3+.
 
 ```
-git clone https://github.com/mithicher/laravel-fresh.git
+git clone https://github.com/CreatorB/al-umm.git
+
+cd al-umm
 
 composer install
 
@@ -120,7 +122,7 @@ GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.17.0.1';
 
 FLUSH PRIVILEGES;
 
-CREATE DATABASE fresh;
+CREATE DATABASE al_umm;
 ```
 
 ## Contributing
