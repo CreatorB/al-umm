@@ -103,11 +103,11 @@
 
         async function getDeviceInfo() {
             const deviceInfo = {
+                ipAddress: '',
+                macAddress: '',
                 userAgent: navigator.userAgent,
                 platform: navigator.platform,
                 vendor: navigator.vendor,
-                ipAddress: '',
-                macAddress: '',
                 timestamp: new Date().toISOString()
             };
 
