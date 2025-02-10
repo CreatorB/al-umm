@@ -26,12 +26,12 @@
         <x-grid mobile="1" tablet="3" laptop="3" desktop="3" gap="6">
             <div class="md:col-span-2">
 
-                <x-heading class="mb-1" size="xl">Grid</x-heading>
+                <x-heading class="mb-1" size="xl">List Menu</x-heading>
                 <x-grid mobile="1" tablet="2" laptop="3" desktop="3" gap="6">
                     <div class="flex items-center justify-center h-16 bg-white rounded-lg shadow">
                         <button class="w-full h-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                             <a href="/attendances/tapping"
-                                class="flex items-center justify-center block w-full h-full">Absen Masuk</a>
+                                class="flex items-center justify-center block w-full h-full">Menu Absen</a>
                         </button>
                     </div>
                     {{-- <div class="h-16 bg-white rounded-lg shadow"></div>
