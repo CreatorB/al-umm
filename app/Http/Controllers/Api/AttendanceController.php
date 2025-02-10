@@ -21,7 +21,8 @@ class AttendanceController extends Controller
         try {
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric'
+                'longitude' => 'required|numeric',
+                'device_info' => 'required',
             ]);
 
             $today = Carbon::now()->toDateString();
@@ -51,12 +52,16 @@ class AttendanceController extends Controller
             $todayDay = strtolower(Carbon::now()->format('l'));
             $startTime = $schedule->{"{$todayDay}_start"};
             $checkInTime = Carbon::now()->format('H:i:s');
+            $detectedDevice = 'Unknown';
+            if($validated['device_info']) {
+                $detectedDevice = $validated['device_info'];
+            }
 
             $attendance = Attendance::create([
                 'user_id' => $user->id,
                 'attendance_date' => $today,
                 'check_in' => Carbon::now(),
-                'check_in_location' => "{$validated['latitude']}, {$validated['longitude']}",
+                'check_in_location' => "{$detectedDevice},lat: {$validated['latitude']}, long: {$validated['longitude']}",
                 'status' => 'hadir',
                 'shift' => $newShift,
                 'late' => $startTime && $checkInTime > $startTime,
@@ -67,7 +72,7 @@ class AttendanceController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Check In Error: ' . $e->getMessage());
-            return $this->errorResponse('Failed to check in', 500);
+            return $this->errorResponse('Failed to check in', 400);
         }
     }
 
@@ -76,7 +81,8 @@ class AttendanceController extends Controller
         try {
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric'
+                'longitude' => 'required|numeric',
+                'device_info' => 'required',
             ]);
 
             $today = Carbon::now()->toDateString();
@@ -103,10 +109,14 @@ class AttendanceController extends Controller
             $todayDay = strtolower(Carbon::now()->format('l'));
             $endTime = $schedule->{"{$todayDay}_end"};
             $checkOutTime = Carbon::now()->format('H:i:s');
+            $detectedDevice = 'Unknown';
+            if($validated['device_info']) {
+                $detectedDevice = $validated['device_info'];
+            }
 
             $lastAttendance->update([
                 'check_out' => Carbon::now(),
-                'check_out_location' => "{$validated['latitude']}, {$validated['longitude']}",
+                'check_out_location' => "{$detectedDevice},lat: {$validated['latitude']}, long: {$validated['longitude']}",
                 'early_leave' => $endTime && $checkOutTime < $endTime,
                 'is_overtime' => $endTime && $checkOutTime > $endTime
             ]);
@@ -115,7 +125,7 @@ class AttendanceController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Check Out Error: ' . $e->getMessage());
-            return $this->errorResponse('Failed to check out', 500);
+            return $this->errorResponse('Failed to check out', 400);
         }
     }
 
@@ -145,7 +155,7 @@ class AttendanceController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Status Check Error: ' . $e->getMessage());
-            return $this->errorResponse('Failed to get status', 500);
+            return $this->errorResponse('Failed to get status', 400);
         }
     }
 
