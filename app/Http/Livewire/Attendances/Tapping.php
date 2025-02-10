@@ -372,30 +372,38 @@ class Tapping extends Component
             return;
         }
 
+        $schedule = $this->getTodaySchedule();
+        if (!$schedule) {
+            session()->flash('error', 'No schedule found for today.');
+            return;
+        }
+
         if (!$this->todayAttendance) {
-            session()->flash('error', 'No active attendance found.');
+            session()->flash('error', 'No active attendance found for today.');
             return;
         }
 
         try {
-            $schedule = $this->getTodaySchedule();
             $todayDay = Carbon::now()->isoFormat('dddd');
             $endTime = $schedule->{"{$todayDay}_end"};
             $checkOutTime = Carbon::now()->format('H:i:s');
 
+            $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info';
+
             $updateData = [
                 'check_out' => Carbon::now(),
-                'check_out_location' => $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected',
+                'check_out_location' => $deviceDetails,
             ];
 
-            if ($endTime && $checkOutTime > $endTime) {
-                $this->emit('showOvertimeModal', 'Apakah Anda bermaksud lembur?', 'check-out');
-            } elseif ($endTime && $checkOutTime < $endTime) {
-                $updateData['early_leave'] = true;
+            if ($endTime) {
+                if ($checkOutTime > $endTime) {
+                    $this->emit('showOvertimeModal', 'Apakah Anda bermaksud lembur?', 'check-out');
+                } elseif ($checkOutTime < $endTime) {
+                    $updateData['early_leave'] = true;
+                }
             }
 
             $this->todayAttendance->update($updateData);
-
             $this->loadTodayAttendance();
             $this->checkAttendanceStatus();
 
@@ -405,6 +413,46 @@ class Tapping extends Component
             session()->flash('error', 'Failed to check out. Please try again.');
         }
     }
+    // public function checkOut()
+    // {
+    //     if (!$this->validateNetwork()) {
+    //         session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
+    //         return;
+    //     }
+
+    //     if (!$this->todayAttendance) {
+    //         session()->flash('error', 'No active attendance found.');
+    //         return;
+    //     }
+
+    //     try {
+    //         $schedule = $this->getTodaySchedule();
+    //         $todayDay = Carbon::now()->isoFormat('dddd');
+    //         $endTime = $schedule->{"{$todayDay}_end"};
+    //         $checkOutTime = Carbon::now()->format('H:i:s');
+
+    //         $updateData = [
+    //             'check_out' => Carbon::now(),
+    //             'check_out_location' => $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected',
+    //         ];
+
+    //         if ($endTime && $checkOutTime > $endTime) {
+    //             $this->emit('showOvertimeModal', 'Apakah Anda bermaksud lembur?', 'check-out');
+    //         } elseif ($endTime && $checkOutTime < $endTime) {
+    //             $updateData['early_leave'] = true;
+    //         }
+
+    //         $this->todayAttendance->update($updateData);
+
+    //         $this->loadTodayAttendance();
+    //         $this->checkAttendanceStatus();
+
+    //         session()->flash('success', 'Successfully checked out!');
+    //     } catch (\Exception $e) {
+    //         Log::error('Check Out Error: ' . $e->getMessage());
+    //         session()->flash('error', 'Failed to check out. Please try again.');
+    //     }
+    // }
 
     public function handleDeviceInfoUpdate($info)
     {
