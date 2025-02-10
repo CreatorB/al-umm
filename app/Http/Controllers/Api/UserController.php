@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\User;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends ApiController
 {
@@ -17,7 +18,7 @@ class UserController extends ApiController
                 'Users retrieved successfully'
             );
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -29,7 +30,7 @@ class UserController extends ApiController
                 'User retrieved successfully'
             );
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -50,7 +51,7 @@ class UserController extends ApiController
                 Response::HTTP_CREATED
             );
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage());
+            return $this->handleException($e);
         }
     }
 }

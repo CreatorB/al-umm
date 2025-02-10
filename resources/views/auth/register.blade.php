@@ -50,6 +50,16 @@
                                 name="password_confirmation" required />
             </div>
 
+            <!-- Keterangan -->
+            <div class="mt-4">
+                <x-label for="notes" :value="__('Jam Kerja')" />
+
+                <x-input id="notes" class="block mt-1 w-full"
+                                type="notes"
+                                placeholder="08:00 - 16:00"
+                                name="notes" required />
+            </div>
+
            
             <x-button class="mt-4 w-full" color="black">
                 {{ __('Register') }}
@@ -61,7 +71,7 @@
             <div class="space-x-3 flex mt-5 text-sm">
                 <a href="{{ url('/') }}" class="text-gray-500 underline">Back to home</a>
                 <div class="text-gray-400">/</div>
-                <a href="#" class="text-gray-500 underline">Contact us</a>
+                <a href="https://wa.me/6289619060672" class="text-gray-500 underline">Contact us</a>
             </div>
         </x-slot>
     </x-auth-card>

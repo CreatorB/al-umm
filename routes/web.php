@@ -3,6 +3,8 @@
 use App\Http\Livewire\Roles;
 use App\Http\Livewire\Users;
 use App\Http\Livewire\Events;
+use App\Http\Livewire\Attendances;
+use App\Http\Livewire\Admin;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,8 +19,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Welcome page
-Route::get('/', function() {
+Route::get('/', function () {
 	return view('welcome');
+});
+
+// ping
+Route::get('/ping', function() {
+    return response('pong')
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET');
 });
 
 // Dashboard
@@ -39,4 +48,13 @@ Route::get('/events/create', Events\Create::class)->name('events.create');
 Route::get('/roles', Roles\Index::class)->middleware(['auth'])->name('roles');
 Route::get('/roles/{role}', Roles\Edit::class)->middleware(['auth'])->name('roles.edit');
 
-require __DIR__.'/auth.php';
+Route::get('/attendances/tapping', Attendances\Tapping::class)->middleware(['auth'])->name('attendances.tapping');
+Route::get('/attendances/perizinan', Attendances\Perizinan::class)->middleware(['auth'])->name('attendances.perizinan');
+// Route::post('/attendances/toggle', [Attendances\Tapping::class, 'toggle'])->name('attendances.toggle');
+
+Route::get('/admin/export-absen', Admin\ExportAbsensi::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.export-absen');
+
+Route::get('/admin/export-users', Admin\ExportUsers::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.export-users');
+
+
+require __DIR__ . '/auth.php';

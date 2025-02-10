@@ -1,7 +1,7 @@
 <?php
 
 return [
-
+    'attendance_server_ip' => env('ATTENDANCE_SERVER_IP', 'http://192.168.50.100'),
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -67,7 +67,8 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // 'timezone' => 'UTC',
+    'timezone' => 'Asia/Jakarta',
 
     /*
     |--------------------------------------------------------------------------
@@ -106,7 +107,8 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+    // 'faker_locale' => 'en_US',
+    'faker_locale' => 'id_ID',
 
     /*
     |--------------------------------------------------------------------------

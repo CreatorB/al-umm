@@ -7,7 +7,9 @@ Sistem Induk Ma'had Al-Imam Asy-Syathiby
 This project based of a TALL stack admin panel starter kit. This started can be used with Laravel 8+, Laravel Livewire 2.5.4+ and AlpineJS 3+.
 
 ```
-git clone https://github.com/mithicher/laravel-fresh.git
+git clone https://github.com/CreatorB/al-umm.git
+
+cd al-umm
 
 composer install
 
@@ -20,6 +22,12 @@ Configure the database with your credentials
 
 ```
 php artisan migrate --seed
+```
+
+Useful commands in development
+
+```
+php artisan view:clear && php artisan optimize:clear && rm -rf storage/framework/views/*
 ```
 
 ## Features:
@@ -79,6 +87,42 @@ Disallow: /
     RewriteRule ^$ public/ [L]
     RewriteRule (.*) public/$1 [L]
 </IfModule>
+```
+
+## Dockering
+
+### initial setup
+
+```
+docker run -d -p 8001:8000 -p 8003:80 -p 8005:3306 -v /home/creatorbe/dev:/var/www/html/dev --name dev lampn
+
+docker exec -it dev bash
+
+composer install
+
+npm install
+
+cp .env.example .env
+
+php artisan key:generate
+
+php artisan migrate --seed
+
+php artisan serve --host=0.0.0.0
+
+npm run dev
+```
+
+### sql setup
+
+```
+CREATE USER 'root'@'172.17.0.1' IDENTIFIED BY '';
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.17.0.1';
+
+FLUSH PRIVILEGES;
+
+CREATE DATABASE al_umm;
 ```
 
 ## Contributing
