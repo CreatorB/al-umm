@@ -18,33 +18,80 @@
                 <span class="block sm:inline">{{ session('error') }}</span>
             </div>
         @endif
+        
         @if (session()->has('success'))
-            <div
-                class="relative px-4 py-3 mb-4 text-green-700 bg-green-100 border border-green-400 rounded alert-success">
+            <div class="relative px-4 py-3 mb-4 text-green-700 bg-green-100 border border-green-400 rounded alert-success">
                 <strong class="font-bold">Success!</strong>
                 <span class="block sm:inline">{{ session('success') }}</span>
             </div>
         @endif
-        <x-card-form>
-            <x-slot name="title">Attendance Tapping</x-slot>
-            <x-slot name="description">Tap to log your attendance</x-slot>
 
-            <div class="flex justify-center space-x-4">
-                @if ($canCheckIn)
-                    <x-button color="green" with-spinner wire:click="checkIn" class="bg-green-600 hover:bg-green-700">
-                        Check In
-                    </x-button>
-                @endif
+        <div class="mb-6 text-center">
+            <h2 class="text-xl text-gray-700">{{ now()->isoFormat('dddd, D MMMM Y') }}</h2>
+        </div>
 
-                @if ($canCheckOut)
-                    <x-button color="red" with-spinner wire:click="checkOut" class="bg-red-600 hover:bg-red-700">
-                        Check Out
-                    </x-button>
-                @endif
+        <div class="mb-6">
+            <x-card-form>
+                <x-slot name="title">Attendance Tapping</x-slot>
+                <x-slot name="description">Tap to log your attendance</x-slot>
+
+                <div class="flex justify-center space-x-4">
+                    @if ($canCheckIn)
+                        <x-button color="green" with-spinner wire:click="checkIn" class="bg-green-600 hover:bg-green-700">
+                            Check In
+                        </x-button>
+                    @endif
+
+                    @if ($canCheckOut)
+                        <x-button color="red" with-spinner wire:click="checkOut" class="bg-red-600 hover:bg-red-700">
+                            Check Out
+                        </x-button>
+                    @endif
+                </div>
+            </x-card-form>
+        </div>
+
+        @if ($todayAttendance)
+            <div class="p-6 mb-6 bg-white rounded-lg shadow-md">
+                <h2 class="mb-4 text-xl font-semibold text-gray-800">Today's Attendance</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b">
+                        <span class="text-gray-600">Check In:</span>
+                        <span class="font-medium text-gray-800">
+                            {{ $todayAttendance->check_in ? $todayAttendance->check_in->format('H:i:s') : 'Not yet' }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pb-2 border-b">
+                        <span class="text-gray-600">Check Out:</span>
+                        <span class="font-medium text-gray-800">
+                            {{ $todayAttendance->check_out ? $todayAttendance->check_out->format('H:i:s') : 'Not yet' }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Status:</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-medium text-gray-800">{{ ucfirst($todayAttendance->status) }}</span>
+                            @if ($todayAttendance->late)
+                                <span class="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">Late</span>
+                            @endif
+                            @if ($todayAttendance->is_overtime)
+                                <span class="px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 rounded-full">Overtime</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if ($todayAttendance->notes)
+                        <div class="pt-2 mt-4 border-t">
+                            <span class="text-gray-600">Notes:</span>
+                            <p class="mt-1 text-gray-800">{{ $todayAttendance->notes }}</p>
+                        </div>
+                    @endif
+                </div>
             </div>
-        </x-card-form>
+        @endif
     </x-section-centered>
-
     <script>
         window.appConfig = {
             ATTENDANCE_SERVER_IP: "{{ config('app.attendance_server_ip') }}"

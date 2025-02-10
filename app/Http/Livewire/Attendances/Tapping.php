@@ -21,6 +21,7 @@ class Tapping extends Component
     public $isInNetwork = false;
     public $pingTime = null;
     public $deviceInfo = null;
+    public $todayAttendance = null;
 
     protected $listeners = [
         'overtimeConfirmed' => 'handleOvertimeConfirmation',
@@ -45,9 +46,18 @@ class Tapping extends Component
 
     public function mount()
     {
+        $this->loadTodayAttendance();
         $this->checkAttendanceStatus();
         // $this->getUserLocation();
         // $this->validateNetwork();
+    }
+
+    private function loadTodayAttendance()
+    {
+        $this->todayAttendance = Attendance::where('user_id', Auth::id())
+            ->whereDate('attendance_date', Carbon::today())
+            ->latest()
+            ->first();
     }
 
     private function getUserLocation()
@@ -117,41 +127,194 @@ class Tapping extends Component
         return ($ip & $mask) === $subnet;
     }
 
+
+    // private function checkAttendanceStatus()
+    // {
+    //     $today = Carbon::now()->toDateString();
+
+    //     $todayAttendance = Attendance::where('user_id', Auth::id())
+    //         ->whereDate('attendance_date', $today)
+    //         ->first();
+
+    //     if (!$todayAttendance) {
+
+    //         $this->canCheckIn = true;
+    //         $this->canCheckOut = false;
+    //     } elseif ($todayAttendance->check_in && !$todayAttendance->check_out) {
+
+    //         $this->canCheckIn = false;
+    //         $this->canCheckOut = true;
+    //     } else {
+
+    //         if ($todayAttendance->shift < 10) {
+    //             $this->canCheckIn = true;
+    //             $this->canCheckOut = false;
+    //         } else {
+    //             $this->canCheckIn = false;
+    //             $this->canCheckOut = false;
+    //             session()->flash('error', 'You have already completed all shifts for today.');
+    //         }
+    //     }
+    // }
     private function checkAttendanceStatus()
     {
-        $today = Carbon::now()->toDateString();
-
-        $todayAttendance = Attendance::where('user_id', Auth::id())
-            ->whereDate('attendance_date', $today)
-            ->first();
-
-        if (!$todayAttendance) {
-
+        if (!$this->todayAttendance) {
             $this->canCheckIn = true;
             $this->canCheckOut = false;
-        } elseif ($todayAttendance->check_in && !$todayAttendance->check_out) {
+            return;
+        }
 
+        if ($this->todayAttendance->check_in && !$this->todayAttendance->check_out) {
             $this->canCheckIn = false;
             $this->canCheckOut = true;
-        } else {
+            return;
+        }
 
-            if ($todayAttendance->shift < 10) {
-                $this->canCheckIn = true;
-                $this->canCheckOut = false;
-            } else {
-                $this->canCheckIn = false;
-                $this->canCheckOut = false;
-                session()->flash('error', 'You have already completed all shifts for today.');
-            }
+        if ($this->todayAttendance->shift < 10) {
+            $this->canCheckIn = true;
+            $this->canCheckOut = false;
+        } else {
+            $this->canCheckIn = false;
+            $this->canCheckOut = false;
+            session()->flash('error', 'You have already completed all shifts for today.');
         }
     }
 
     private function getTodaySchedule()
     {
-        $user = User::find(Auth::id());
+        // $user = User::find(Auth::id());
+        // return $user->schedule;
+        $user = User::with(['department', 'schedule', 'part'])->find(Auth::id());
         return $user->schedule;
     }
 
+    // public function checkIn()
+    // {
+    //     if (!$this->validateNetwork()) {
+    //         session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
+    //         return;
+    //     }
+
+    //     $today = Carbon::now()->toDateString();
+
+    //     // if (!$this->latitude || !$this->longitude) {
+    //     //     session()->flash('error', 'Lokasi tidak valid. Pastikan izin lokasi diaktifkan.');
+    //     //     return;
+    //     // }
+
+    //     $schedule = $this->getTodaySchedule();
+    //     if (!$schedule) {
+    //         session()->flash('error', 'No schedule found for today.');
+    //         return;
+    //     }
+
+    //     // $distance = $this->isWithinRange();
+    //     // if ($distance > $this->maxDistance) {
+    //     //     session()->flash('error', 'You are not within the allowed range to check in. Your current location: ' .
+    //     //         "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
+    //     //     return;
+    //     // }
+
+    //     try {
+
+    //         $latestShift = Attendance::where('user_id', Auth::id())
+    //             ->whereDate('attendance_date', $today)
+    //             ->orderBy('shift', 'desc')
+    //             ->first();
+
+    //         $newShift = $latestShift ? $latestShift->shift + 1 : 1;
+
+    //         $todayDay = Carbon::now()->isoFormat('dddd');
+    //         $startTime = $schedule->{"{$todayDay}_start"};
+    //         $endTime = $schedule->{"{$todayDay}_end"};
+
+    //         $checkInTime = Carbon::now()->format('H:i:s');
+
+    //         $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info';
+    //         $connectionInfo = $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected';
+
+    //         $attendanceData = [
+    //             'user_id' => Auth::id(),
+    //             'attendance_date' => $today,
+    //             'check_in' => Carbon::now(),
+    //             // 'check_in_location' => "{$this->latitude}, {$this->longitude}",
+    //             'check_in_location' => $deviceDetails,
+    //             'status' => 'hadir',
+    //             'shift' => $newShift,
+    //         ];
+
+    //         if ($startTime && $checkInTime < $startTime) {
+    //             $this->emit('showOvertimeModal', 'Apakah Anda bermaksud lembur?', 'check-in');
+    //         } elseif ($startTime && $checkInTime > $startTime) {
+    //             $attendanceData['late'] = true;
+    //         }
+
+    //         Attendance::create($attendanceData);
+
+    //         $this->canCheckIn = false;
+    //         $this->canCheckOut = true;
+    //         session()->flash('success', 'Successfully checked in for shift ' . $newShift . '!');
+    //     } catch (\Exception $e) {
+    //         Log::error('Check In Error: ' . $e->getMessage());
+    //         session()->flash('error', 'Failed to check in. Please try again.');
+    //     }
+    // }
+
+    // public function checkOut()
+    // {
+    //     if (!$this->validateNetwork()) {
+    //         session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
+    //         return;
+    //     }
+
+    //     $today = Carbon::now()->toDateString();
+
+    //     // $distance = $this->isWithinRange();
+    //     // if ($distance > $this->maxDistance) {
+    //     //     session()->flash('error', 'You are not within the allowed range to check out. Your current location: ' .
+    //     //         "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
+    //     //     return;
+    //     // }
+
+    //     try {
+    //         $lastAttendance = Attendance::where('user_id', Auth::id())
+    //             ->whereDate('attendance_date', $today)
+    //             ->whereNull('check_out')
+    //             ->latest()
+    //             ->first();
+
+    //         if ($lastAttendance) {
+
+    //             $schedule = $this->getTodaySchedule();
+    //             $todayDay = Carbon::now()->isoFormat('dddd');
+    //             $startTime = $schedule->{"{$todayDay}_start"};
+    //             $endTime = $schedule->{"{$todayDay}_end"};
+
+    //             $checkOutTime = Carbon::now()->format('H:i:s');
+
+    //             $updateData = [
+    //                 'check_out' => Carbon::now(),
+    //                 // 'check_out_location' => "{$this->latitude}, {$this->longitude}",
+    //                 'check_out_location' => $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected',
+    //             ];
+
+    //             if ($endTime && $checkOutTime > $endTime) {
+    //                 $this->emit('showOvertimeModal', 'Apakah Anda bermaksud lembur?', 'check-out');
+    //             } elseif ($endTime && $checkOutTime < $endTime) {
+    //                 $updateData['early_leave'] = true;
+    //             }
+
+    //             $lastAttendance->update($updateData);
+
+    //             $this->canCheckIn = true;
+    //             $this->canCheckOut = false;
+    //             session()->flash('success', 'Successfully checked out for shift ' . $lastAttendance->shift . '!');
+    //         }
+    //     } catch (\Exception $e) {
+    //         Log::error('Check Out Error: ' . $e->getMessage());
+    //         session()->flash('error', 'Failed to check out. Please try again.');
+    //     }
+    // }
     public function checkIn()
     {
         if (!$this->validateNetwork()) {
@@ -159,49 +322,26 @@ class Tapping extends Component
             return;
         }
 
-        $today = Carbon::now()->toDateString();
-
-        // if (!$this->latitude || !$this->longitude) {
-        //     session()->flash('error', 'Lokasi tidak valid. Pastikan izin lokasi diaktifkan.');
-        //     return;
-        // }
-
         $schedule = $this->getTodaySchedule();
         if (!$schedule) {
             session()->flash('error', 'No schedule found for today.');
             return;
         }
 
-        // $distance = $this->isWithinRange();
-        // if ($distance > $this->maxDistance) {
-        //     session()->flash('error', 'You are not within the allowed range to check in. Your current location: ' .
-        //         "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
-        //     return;
-        // }
-
         try {
-
-            $latestShift = Attendance::where('user_id', Auth::id())
-                ->whereDate('attendance_date', $today)
-                ->orderBy('shift', 'desc')
-                ->first();
-
-            $newShift = $latestShift ? $latestShift->shift + 1 : 1;
+            $latestShift = $this->todayAttendance ? $this->todayAttendance->shift : 0;
+            $newShift = $latestShift + 1;
 
             $todayDay = Carbon::now()->isoFormat('dddd');
             $startTime = $schedule->{"{$todayDay}_start"};
-            $endTime = $schedule->{"{$todayDay}_end"};
-
             $checkInTime = Carbon::now()->format('H:i:s');
 
             $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info';
-            $connectionInfo = $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected';
 
             $attendanceData = [
                 'user_id' => Auth::id(),
-                'attendance_date' => $today,
+                'attendance_date' => Carbon::today(),
                 'check_in' => Carbon::now(),
-                // 'check_in_location' => "{$this->latitude}, {$this->longitude}",
                 'check_in_location' => $deviceDetails,
                 'status' => 'hadir',
                 'shift' => $newShift,
@@ -215,8 +355,9 @@ class Tapping extends Component
 
             Attendance::create($attendanceData);
 
-            $this->canCheckIn = false;
-            $this->canCheckOut = true;
+            $this->loadTodayAttendance();
+            $this->checkAttendanceStatus();
+
             session()->flash('success', 'Successfully checked in for shift ' . $newShift . '!');
         } catch (\Exception $e) {
             Log::error('Check In Error: ' . $e->getMessage());
@@ -231,49 +372,34 @@ class Tapping extends Component
             return;
         }
 
-        $today = Carbon::now()->toDateString();
-
-        // $distance = $this->isWithinRange();
-        // if ($distance > $this->maxDistance) {
-        //     session()->flash('error', 'You are not within the allowed range to check out. Your current location: ' .
-        //         "{$this->latitude}, {$this->longitude}. Distance: " . round($distance, 2) . ' meters');
-        //     return;
-        // }
+        if (!$this->todayAttendance) {
+            session()->flash('error', 'No active attendance found.');
+            return;
+        }
 
         try {
-            $lastAttendance = Attendance::where('user_id', Auth::id())
-                ->whereDate('attendance_date', $today)
-                ->whereNull('check_out')
-                ->latest()
-                ->first();
+            $schedule = $this->getTodaySchedule();
+            $todayDay = Carbon::now()->isoFormat('dddd');
+            $endTime = $schedule->{"{$todayDay}_end"};
+            $checkOutTime = Carbon::now()->format('H:i:s');
 
-            if ($lastAttendance) {
+            $updateData = [
+                'check_out' => Carbon::now(),
+                'check_out_location' => $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected',
+            ];
 
-                $schedule = $this->getTodaySchedule();
-                $todayDay = Carbon::now()->isoFormat('dddd');
-                $startTime = $schedule->{"{$todayDay}_start"};
-                $endTime = $schedule->{"{$todayDay}_end"};
-
-                $checkOutTime = Carbon::now()->format('H:i:s');
-
-                $updateData = [
-                    'check_out' => Carbon::now(),
-                    // 'check_out_location' => "{$this->latitude}, {$this->longitude}",
-                    'check_out_location' => $this->pingTime ? "Connected ({$this->pingTime}ms)" : 'Connected',
-                ];
-
-                if ($endTime && $checkOutTime > $endTime) {
-                    $this->emit('showOvertimeModal', 'Apakah Anda bermaksud lembur?', 'check-out');
-                } elseif ($endTime && $checkOutTime < $endTime) {
-                    $updateData['early_leave'] = true;
-                }
-
-                $lastAttendance->update($updateData);
-
-                $this->canCheckIn = true;
-                $this->canCheckOut = false;
-                session()->flash('success', 'Successfully checked out for shift ' . $lastAttendance->shift . '!');
+            if ($endTime && $checkOutTime > $endTime) {
+                $this->emit('showOvertimeModal', 'Apakah Anda bermaksud lembur?', 'check-out');
+            } elseif ($endTime && $checkOutTime < $endTime) {
+                $updateData['early_leave'] = true;
             }
+
+            $this->todayAttendance->update($updateData);
+
+            $this->loadTodayAttendance();
+            $this->checkAttendanceStatus();
+
+            session()->flash('success', 'Successfully checked out!');
         } catch (\Exception $e) {
             Log::error('Check Out Error: ' . $e->getMessage());
             session()->flash('error', 'Failed to check out. Please try again.');
@@ -282,6 +408,11 @@ class Tapping extends Component
 
     public function handleDeviceInfoUpdate($info)
     {
+        if (empty($info)) {
+            Log::warning('Empty device info received');
+            return;
+        }
+
         $this->deviceInfo = $info;
         Log::info('Device info updated', ['info' => $info]);
     }
@@ -297,23 +428,42 @@ class Tapping extends Component
         return true;
     }
 
+    // public function handleOvertimeConfirmation($isOvertime, $type)
+    // {
+    //     if ($isOvertime) {
+    //         if ($type === 'check-in') {
+
+    //             Attendance::where('user_id', Auth::id())
+    //                 ->whereDate('attendance_date', Carbon::today())
+    //                 ->latest()
+    //                 ->update(['is_overtime' => true, 'over_time_in' => Carbon::now()]);
+    //         } elseif ($type === 'check-out') {
+
+    //             Attendance::where('user_id', Auth::id())
+    //                 ->whereDate('attendance_date', Carbon::today())
+    //                 ->latest()
+    //                 ->update(['is_overtime' => true, 'over_time_out' => Carbon::now()]);
+    //         }
+    //     }
+    // }
     public function handleOvertimeConfirmation($isOvertime, $type)
     {
-        if ($isOvertime) {
-            if ($type === 'check-in') {
+        if (!$isOvertime || !$this->todayAttendance)
+            return;
 
-                Attendance::where('user_id', Auth::id())
-                    ->whereDate('attendance_date', Carbon::today())
-                    ->latest()
-                    ->update(['is_overtime' => true, 'over_time_in' => Carbon::now()]);
-            } elseif ($type === 'check-out') {
-
-                Attendance::where('user_id', Auth::id())
-                    ->whereDate('attendance_date', Carbon::today())
-                    ->latest()
-                    ->update(['is_overtime' => true, 'over_time_out' => Carbon::now()]);
-            }
+        if ($type === 'check-in') {
+            $this->todayAttendance->update([
+                'is_overtime' => true,
+                'over_time_in' => Carbon::now()
+            ]);
+        } elseif ($type === 'check-out') {
+            $this->todayAttendance->update([
+                'is_overtime' => true,
+                'over_time_out' => Carbon::now()
+            ]);
         }
+
+        $this->loadTodayAttendance();
     }
 
     private function isWithinRange()
