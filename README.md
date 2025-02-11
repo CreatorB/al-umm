@@ -89,6 +89,62 @@ Disallow: /
 </IfModule>
 ```
 
+### Another hosting solution
+
+---
+## **🔧 Solution 1: Use the `--no-scripts` Option**  
+Since the error occurs when running **`post-autoload-dump`**, try installing Composer without executing automatic scripts:
+
+```sh
+composer install --no-scripts
+```
+
+Then, manually run the following commands to complete the installation:
+
+```sh
+php artisan clear-compiled
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+php artisan optimize
+```
+
+If your application runs correctly, then the issue is only with Composer scripts.
+
+---
+
+## **🔧 Solution 2: Use Composer PHAR**  
+Try using **Composer PHAR**, as the installed Composer version on the server might have a bug or be incompatible with PHP 8.3.
+
+1. **Download Composer PHAR on your hosting server**:  
+   ```sh
+   curl -sS https://getcomposer.org/installer | php
+   ```
+
+2. **Use Composer PHAR to install dependencies**:  
+   ```sh
+   php composer.phar install --no-dev --optimize-autoloader
+   ```
+
+If this works, **remove the Composer installed via cPanel** and use `composer.phar` as the default.
+
+---
+
+## **🔧 Solution 3: Install Locally and Upload to Hosting**  
+Since shared hosting restricts some PHP functions, you can install dependencies **on your local machine** and then upload the `vendor/` folder to the hosting server.
+
+1. **On your local machine**, run:  
+   ```sh
+   composer install --no-dev --optimize-autoloader
+   ```
+
+2. **Upload the entire `vendor/` folder** to **`public_html/al-umm/vendor/`** via **FTP** or **cPanel File Manager**.
+
+3. **Ensure the `.env` file and other configuration files are correctly set** on the hosting server.
+
+---
+
 ## Dockering
 
 ### initial setup
