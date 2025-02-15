@@ -54,6 +54,7 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
+        'check.local' => \App\Http\Middleware\CheckLocalServer::class,
         'check.role.access' => \App\Http\Middleware\CheckRoleAccess::class,
         'ensure.token' => \App\Http\Middleware\EnsureTokenIsValid::class,
         'auth' => \App\Http\Middleware\Authenticate::class,

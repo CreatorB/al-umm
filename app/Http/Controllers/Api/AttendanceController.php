@@ -8,6 +8,7 @@ use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Log;
+use App\Utils\NetworkUtils;
 
 class AttendanceController extends Controller
 {
@@ -19,6 +20,10 @@ class AttendanceController extends Controller
     public function checkIn(Request $request)
     {
         try {
+            if (!NetworkUtils::isLocalServerAccessible()) {
+                return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
+            }
+
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
@@ -53,7 +58,7 @@ class AttendanceController extends Controller
             $startTime = $schedule->{"{$todayDay}_start"};
             $checkInTime = Carbon::now()->format('H:i:s');
             $detectedDevice = 'Unknown';
-            if($validated['device_info']) {
+            if ($validated['device_info']) {
                 $detectedDevice = $validated['device_info'];
             }
 
@@ -79,6 +84,10 @@ class AttendanceController extends Controller
     public function checkOut(Request $request)
     {
         try {
+            if (!NetworkUtils::isLocalServerAccessible()) {
+                return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
+            }
+
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
@@ -110,7 +119,7 @@ class AttendanceController extends Controller
             $endTime = $schedule->{"{$todayDay}_end"};
             $checkOutTime = Carbon::now()->format('H:i:s');
             $detectedDevice = 'Unknown';
-            if($validated['device_info']) {
+            if ($validated['device_info']) {
                 $detectedDevice = $validated['device_info'];
             }
 

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Livewire\Attendances;
 
+use App\Utils\NetworkUtils;
 use Livewire\Component;
 use Log;
 use Auth;
@@ -318,7 +319,7 @@ class Tapping extends Component
     public function checkIn()
     {
         if (!$this->validateNetwork()) {
-            session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
+            // session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
             return;
         }
 
@@ -368,7 +369,7 @@ class Tapping extends Component
     public function checkOut()
     {
         if (!$this->validateNetwork()) {
-            session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
+            // session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
             return;
         }
 
@@ -454,26 +455,72 @@ class Tapping extends Component
     //     }
     // }
 
+    // public function handleDeviceInfoUpdate($info)
+    // {
+    //     if (empty($info)) {
+    //         Log::warning('Empty device info received');
+    //         return;
+    //     }
+
+    //     $this->deviceInfo = $info;
+    //     Log::info('Device info updated', ['info' => $info]);
+    // }
     public function handleDeviceInfoUpdate($info)
     {
+        Log::info('Device info update received', [
+            'info' => $info,
+            'isArray' => is_array($info)
+        ]);
+
         if (empty($info)) {
             Log::warning('Empty device info received');
             return;
         }
 
-        $this->deviceInfo = $info;
-        Log::info('Device info updated', ['info' => $info]);
+        $deviceInfo = is_array($info) ? $info : json_decode($info, true);
+
+        $this->deviceInfo = $deviceInfo;
+        $this->isInNetwork = true;
+
+        Log::info('Device info updated', [
+            'deviceInfo' => $this->deviceInfo,
+            'isInNetwork' => $this->isInNetwork
+        ]);
     }
     public function validateNetwork()
     {
-        // Log::info('Validating network. isInNetwork: ' . ($this->isInNetwork ? 'true' : 'false'));
+
+        Log::info('Network Validation Started', [
+            'isInNetwork' => $this->isInNetwork,
+            'deviceInfo' => $this->deviceInfo,
+            'pingTime' => $this->pingTime
+        ]);
+
         if (!$this->isInNetwork) {
             $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info available';
-            Log::info('Network validation failed', ['device_info' => $deviceDetails]);
-            session()->flash('error', 'Anda harus terhubung ke jaringan Wi-Fi / LAN Mahad Syathiby untuk melakukan absensi.');
+            Log::warning('Network validation failed', [
+                'device_info' => $deviceDetails,
+                'isInNetwork' => $this->isInNetwork
+            ]);
+            session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
             return false;
         }
-        return true;
+
+        try {
+            $isServerAccessible = NetworkUtils::isLocalServerAccessible();
+            if (!$isServerAccessible) {
+                Log::warning('Local server not accessible');
+                session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
+                return false;
+            }
+
+            Log::info('Network validation successful');
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Network validation error: ' . $e->getMessage());
+            session()->flash('error', 'Gagal melakukan validasi jaringan. Silakan coba lagi.');
+            return false;
+        }
     }
 
     // public function handleOvertimeConfirmation($isOvertime, $type)
