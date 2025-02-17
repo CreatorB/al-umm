@@ -20,9 +20,9 @@ class AttendanceController extends Controller
     public function checkIn(Request $request)
     {
         try {
-            if (!NetworkUtils::isLocalServerAccessible()) {
-                return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
-            }
+            // if (!NetworkUtils::isLocalServerAccessible()) {
+            //     return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
+            // }
 
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
@@ -84,9 +84,9 @@ class AttendanceController extends Controller
     public function checkOut(Request $request)
     {
         try {
-            if (!NetworkUtils::isLocalServerAccessible()) {
-                return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
-            }
+            // if (!NetworkUtils::isLocalServerAccessible()) {
+            //     return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
+            // }
 
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
