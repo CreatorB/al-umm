@@ -3,23 +3,27 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Utils\NetworkUtils;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class CheckLocalServer
 {
     public function handle($request, Closure $next)
     {
-        $userIp = $request->ip();
-        $segments = explode('.', $userIp);
+        Log::info('Middleware CheckLocalServer is running');
 
-        if (
-            $segments[0] == '192' && $segments[1] == '168' &&
-            $segments[2] >= 10 && $segments[2] <= 100
-        ) {
-            return $next($request);
+        $allowedPublicIp = env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98');
+        $userIp = file_get_contents('https://api.ipify.org?format=json');
+        $userIp = json_decode($userIp, true)['ip'] ?? '';
+
+        if ($userIp !== $allowedPublicIp) {
+            Log::warning("Unauthorized IP: {$userIp}");
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Afwan, Absen hanya bisa dilakukan dalam jaringan kantor.'], 403);
+            }
+            return abort(403, 'Afwan, Absen hanya bisa dilakukan dalam jaringan kantor.');
         }
 
-        return response()->json(['error' => 'Afwan, absen hanya bisa dilakukan dalam jaringan Wi-Fi / LAN Mahad Syathiby.'], 403);
-
+        return $next($request);
     }
 }

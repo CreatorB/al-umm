@@ -48,7 +48,7 @@ Route::get('/events/create', Events\Create::class)->name('events.create');
 Route::get('/roles', Roles\Index::class)->middleware(['auth'])->name('roles');
 Route::get('/roles/{role}', Roles\Edit::class)->middleware(['auth'])->name('roles.edit');
 
-Route::get('/attendances/tapping', Attendances\Tapping::class)->middleware(['auth'])->name('attendances.tapping');
+Route::get('/attendances/tapping', Attendances\Tapping::class)->middleware(['auth', 'check.local'])->name('attendances.tapping');
 Route::get('/attendances/perizinan', Attendances\Perizinan::class)->middleware(['auth'])->name('attendances.perizinan');
 // Route::post('/attendances/toggle', [Attendances\Tapping::class, 'toggle'])->name('attendances.toggle');
 

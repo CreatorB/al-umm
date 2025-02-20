@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Log;
 use App\Utils\NetworkUtils;
+use App\Http\Middleware\CheckLocalServer;
 
 class AttendanceController extends Controller
 {
@@ -16,6 +17,11 @@ class AttendanceController extends Controller
     private $targetLatitude = -6.395193286627945;
     private $targetLongitude = 106.96255401126793;
     private $maxDistance = 3000;
+
+    public function __construct()
+    {
+        $this->middleware('check.local')->only(['checkIn', 'checkOut']);
+    }
 
     public function checkIn(Request $request)
     {
