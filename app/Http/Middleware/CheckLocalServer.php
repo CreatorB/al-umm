@@ -8,12 +8,23 @@ use Illuminate\Support\Facades\Log;
 
 class CheckLocalServer
 {
+    function getUrlContent($url)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        return $output;
+    }
     public function handle($request, Closure $next)
     {
         Log::info('Middleware CheckLocalServer is running');
 
         $allowedPublicIp = env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98');
-        $userIp = file_get_contents('https://api.ipify.org?format=json');
+        // $userIp = file_get_contents('https://api.ipify.org?format=json');
+        $userIp = $this->getUrlContent('https://api.ipify.org?format=json');
         $userIp = json_decode($userIp, true)['ip'] ?? '';
 
         if ($userIp !== $allowedPublicIp) {
