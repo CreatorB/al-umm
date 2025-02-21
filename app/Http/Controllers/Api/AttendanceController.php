@@ -36,6 +36,8 @@ class AttendanceController extends Controller
                 'device_info' => 'required',
             ]);
 
+            Log::info("Device info checkIn: " . $validated['device_info']);
+
             $today = Carbon::now()->toDateString();
             $user = auth()->user();
 
@@ -83,7 +85,7 @@ class AttendanceController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Check In Error: ' . $e->getMessage());
-            return $this->errorResponse('Failed to check in', 400);
+            return $this->errorResponse('Failed to check in : ' . $e->getMessage(), 400);
         }
     }
 
@@ -99,6 +101,8 @@ class AttendanceController extends Controller
                 'longitude' => 'required|numeric',
                 'device_info' => 'required',
             ]);
+
+            Log::info("Device info checkOut: " . $validated['device_info']);
 
             $today = Carbon::now()->toDateString();
             $user = auth()->user();
@@ -140,7 +144,7 @@ class AttendanceController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Check Out Error: ' . $e->getMessage());
-            return $this->errorResponse('Failed to check out', 400);
+            return $this->errorResponse('Failed to check out : ' . $e->getMessage(), 400);
         }
     }
 
