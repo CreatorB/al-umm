@@ -32,7 +32,7 @@ class CheckLocalServer
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Afwan, Absen hanya bisa dilakukan dalam jaringan kantor.'], 403);
             }
-            return abort(403, 'Afwan, Absen hanya bisa dilakukan dalam jaringan kantor.');
+            return abort(403, 'Afwan, Absen hanya bisa dilakukan dalam jaringan Wi-Fi / LAN Mahad Syathiby.');
         }
 
         return $next($request);
