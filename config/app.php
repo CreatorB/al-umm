@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'attendance_server_ip' => env('ATTENDANCE_SERVER_IP', 'http://192.168.50.100'),
+    'attendance_server_web' => env('ATTENDANCE_SERVER_WEB', 'http://192.168.50.100'),
     /*
     |--------------------------------------------------------------------------
     | Application Name

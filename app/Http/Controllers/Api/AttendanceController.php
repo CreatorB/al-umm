@@ -8,6 +8,8 @@ use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Log;
+use App\Utils\NetworkUtils;
+use App\Http\Middleware\CheckLocalServer;
 
 class AttendanceController extends Controller
 {
@@ -16,9 +18,18 @@ class AttendanceController extends Controller
     private $targetLongitude = 106.96255401126793;
     private $maxDistance = 3000;
 
+    public function __construct()
+    {
+        $this->middleware('check.local')->only(['checkIn', 'checkOut']);
+    }
+
     public function checkIn(Request $request)
     {
         try {
+            // if (!NetworkUtils::isLocalServerAccessible()) {
+            //     return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
+            // }
+
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
@@ -53,7 +64,7 @@ class AttendanceController extends Controller
             $startTime = $schedule->{"{$todayDay}_start"};
             $checkInTime = Carbon::now()->format('H:i:s');
             $detectedDevice = 'Unknown';
-            if($validated['device_info']) {
+            if ($validated['device_info']) {
                 $detectedDevice = $validated['device_info'];
             }
 
@@ -79,6 +90,10 @@ class AttendanceController extends Controller
     public function checkOut(Request $request)
     {
         try {
+            // if (!NetworkUtils::isLocalServerAccessible()) {
+            //     return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
+            // }
+
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
@@ -110,7 +125,7 @@ class AttendanceController extends Controller
             $endTime = $schedule->{"{$todayDay}_end"};
             $checkOutTime = Carbon::now()->format('H:i:s');
             $detectedDevice = 'Unknown';
-            if($validated['device_info']) {
+            if ($validated['device_info']) {
                 $detectedDevice = $validated['device_info'];
             }
 

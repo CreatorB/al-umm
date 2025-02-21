@@ -94,7 +94,7 @@
     </x-section-centered>
     <script>
         window.appConfig = {
-            ATTENDANCE_SERVER_IP: "{{ config('app.attendance_server_ip') }}"
+            ATTENDANCE_SERVER_WEB: "{{ config('app.attendance_server_web') }}"
         };
 
         function env(key) {
@@ -137,7 +137,7 @@
 
         async function pingServer() {
             try {
-                const serverUrl = env('ATTENDANCE_SERVER_IP');
+                const serverUrl = env('ATTENDANCE_SERVER_WEB');
                 if (!serverUrl) {
                     throw new Error('Server URL not configured');
                 }
@@ -211,14 +211,12 @@
             }
         }
 
-        // Initialize ping check
         document.addEventListener('DOMContentLoaded', () => {
             pingServer()
                 .then(() => console.log('Initial ping successful'))
                 .catch(error => console.error('Initial ping failed:', error));
         });
 
-        // Set up Livewire event listener
         if (typeof Livewire !== 'undefined') {
             Livewire.on('checkPing', () => {
                 pingServer()
