@@ -302,9 +302,10 @@ class ExportAbsensi extends Component
             $row++;
         }
 
-        // Auto-size columns
-        foreach (range('A', $sheet->getHighestColumn()) as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        $highestColumn = $sheet->getHighestColumn();
+        $columnIterator = $sheet->getColumnIterator('A', $highestColumn);
+        foreach ($columnIterator as $column) {
+            $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
         }
 
         $writer = new Xlsx($spreadsheet);
