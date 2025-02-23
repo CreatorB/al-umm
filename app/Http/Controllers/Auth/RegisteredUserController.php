@@ -49,8 +49,10 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        // Auth::login($user);
+        // return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('login')
+            ->with('status', 'Registrasi berhasil mohon tunggu aktifasi dari admin.');
 
-        return redirect(RouteServiceProvider::HOME);
     }
 }
