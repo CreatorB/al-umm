@@ -24,10 +24,23 @@ Configure the database with your credentials
 php artisan migrate --seed
 ```
 
+** Dev update, adding title to schedules table**
+```
+composer require doctrine/dbal
+
+php artisan migrate --path=/database/migrations/2025_02_23_000001_add_title_to_schedules_table.php
+
+php artisan schedules:update-titles
+```
+
 Useful commands in development
 
 ```
 php artisan view:clear && php artisan optimize:clear && rm -rf storage/framework/views/*
+
+// if you have adding new packages, better to run below command again :
+composer install ; composer dump-autoload
+// or composer update --lock
 ```
 
 ## Features:
