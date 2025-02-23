@@ -5,6 +5,7 @@ use App\Http\Livewire\Users;
 use App\Http\Livewire\Events;
 use App\Http\Livewire\Attendances;
 use App\Http\Livewire\Admin;
+use App\Http\Livewire\Admin\Users as AdminUsers;;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,8 +54,40 @@ Route::get('/attendances/perizinan', Attendances\Perizinan::class)->middleware([
 // Route::post('/attendances/toggle', [Attendances\Tapping::class, 'toggle'])->name('attendances.toggle');
 
 Route::get('/admin/export-absen', Admin\ExportAbsensi::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.export-absen');
-
 Route::get('/admin/export-users', Admin\ExportUsers::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.export-users');
+// Route::get('/admin/users-edit', Admin\UsersEdit::class)->middleware(['auth', 'check.role.access:hr,admin,superadmin'])->name('admin.users-edit');
+
+Route::middleware(['auth'])->group(function () {
+    // multi role route
+    Route::prefix('admin')->middleware(['check.role.access:hr,admin,superadmin'])->group(function () {
+        Route::get('/users/{user}/edit', AdminUsers\Edit::class)
+            ->name('admin.users.edit');
+    });
+
+    // Superadmin routes
+    // Route::prefix('superadmin')->middleware(['role:superadmin'])->group(function () {
+    //     Route::get('/users', \App\Http\Livewire\Superadmin\Users\Index::class)
+    //         ->name('superadmin.users.index');
+    //     Route::get('/users/{user}/edit', \App\Http\Livewire\Superadmin\Users\Edit::class)
+    //         ->name('superadmin.users.edit');
+    // });
+
+    // Admin routes
+    // Route::prefix('admin')->middleware(['role:admin'])->group(function () {
+    //     Route::get('/users', \App\Http\Livewire\Admin\Users\Index::class)
+    //         ->name('admin.users.index');
+    //     Route::get('/users/{user}/edit', \App\Http\Livewire\Admin\Users\Edit::class)
+    //         ->name('admin.users.edit');
+    // });
+
+    // Staff/other roles routes
+    // Route::prefix('staff')->middleware(['role:staff'])->group(function () {
+    //     Route::get('/users', \App\Http\Livewire\Staff\Users\Index::class)
+    //         ->name('staff.users.index');
+    //     Route::get('/users/{user}/edit', \App\Http\Livewire\Staff\Users\Edit::class)
+    //         ->name('staff.users.edit');
+    // });
+});
 
 
 require __DIR__ . '/auth.php';
