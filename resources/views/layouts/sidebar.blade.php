@@ -21,7 +21,7 @@
         @endif
 
         <!-- Menu Roles -->
-        @if (auth()->user()->hasAnyRole(['superadmin', 'admin', 'hr']))
+        @if (auth()->user()->hasAnyRole(['superadmin']))
             <x-nav-item to="{{ route('roles') }}" class="flex items-center py-2 text-gray-100">
                 <x-iconic-lock class="w-6 h-6 mr-4 text-gray-300 stroke-current" />Roles
             </x-nav-item>
