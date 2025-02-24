@@ -5,6 +5,7 @@ use Livewire\Component;
 use App\Models\User;
 use App\Models\Attendance;
 use Carbon\Carbon;
+use Livewire\WithPagination;
 use Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportAbsensi extends Component
 {
+
+    use WithPagination;
     public $startDate;
     public $endDate;
 
@@ -19,15 +22,48 @@ class ExportAbsensi extends Component
     public $selectedDate;
     public $statusFilter = '';
     public $perPage = 10;
+
+    protected $paginationTheme = 'tailwind';
+    public function getRouteKeyName()
+    {
+        return 'admin.export-absen';
+    }
     public $sortField = 'check_in';
     public $sortDirection = 'desc';
-    protected $queryString = ['search', 'selectedDate', 'statusFilter', 'sortField', 'sortDirection'];
-
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'selectedDate' => ['except' => ''],
+        'statusFilter' => ['except' => ''],
+        'sortField' => ['except' => 'check_in'],
+        'sortDirection' => ['except' => 'desc']
+    ];
 
     protected $rules = [
         'startDate' => 'required|date',
         'endDate' => 'required|date|after_or_equal:startDate',
     ];
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedDate()
+    {
+        $this->resetPage();
+    }
+
+    public function resetFilters()
+    {
+        $this->reset(['search', 'statusFilter']);
+        $this->selectedDate = now()->format('Y-m-d');
+        $this->resetPage();
+    }
 
     public function mount()
     {
@@ -669,8 +705,7 @@ class ExportAbsensi extends Component
             ])
             ->orderBy($this->sortField, $this->sortDirection)
             ->orderBy('users.name')
-            ->get()
-            ->groupBy('user_id');
+            ->paginate($this->perPage);
     }
 
     public function sortBy($field)
@@ -683,14 +718,10 @@ class ExportAbsensi extends Component
         }
     }
 
-    public function resetFilters()
-    {
-        $this->reset(['search', 'statusFilter']);
-        $this->selectedDate = now()->format('Y-m-d');
-    }
-
     public function render()
     {
+        // dd($this->attendances);
+
         return view('livewire.admin.export-absen', [
             'attendances' => $this->attendances
         ]);

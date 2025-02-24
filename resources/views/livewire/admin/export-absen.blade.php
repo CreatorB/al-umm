@@ -105,22 +105,22 @@
                                         </a>
                                     </th>
                                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                        Location</th>
+                                        Details</th>
                                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                         Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
-                                @forelse($attendances as $userId => $userAttendances)
-                                    <tr>
-                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
-                                            {{ $userAttendances->first()->name }}
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                            {{ $userAttendances->first()->email }}
-                                        </td>
-                                        <td class="px-3 py-4 text-sm text-gray-500">
-                                            @foreach($userAttendances as $attendance)
+                                @if($attendances && $attendances->count() > 0)
+                                    @foreach($attendances as $attendance)
+                                        <tr>
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
+                                                {{ $attendance->name }}
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                {{ $attendance->email }}
+                                            </td>
+                                            <td class="px-3 py-4 text-sm text-gray-500">
                                                 <div class="mb-1">
                                                     @if($attendance->check_in)
                                                         <span class="text-green-600">
@@ -133,10 +133,8 @@
                                                         </span>
                                                     @endif
                                                 </div>
-                                            @endforeach
-                                        </td>
-                                        <td class="px-3 py-4 text-sm text-gray-500">
-                                            @foreach($userAttendances as $attendance)
+                                            </td>
+                                            <td class="px-3 py-4 text-sm text-gray-500">
                                                 <div class="mb-1">
                                                     <div class="text-xs">
                                                         @if($attendance->check_in_location)
@@ -149,30 +147,36 @@
                                                         @endif
                                                     </div>
                                                 </div>
-                                            @endforeach
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-4 text-sm">
-                                            <span
-                                                class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                                                {{ $userAttendances->first()->status === 'hadir' ? 'bg-green-100 text-green-800' : '' }}
-                                                {{ $userAttendances->first()->status === 'sakit' ? 'bg-red-100 text-red-800' : '' }}
-                                                {{ $userAttendances->first()->status === 'izin' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                                {{ $userAttendances->first()->status === 'tugas_luar' ? 'bg-blue-100 text-blue-800' : '' }}
-                                                {{ $userAttendances->first()->status === 'cuti' ? 'bg-purple-100 text-purple-800' : '' }}
-                                                {{ $userAttendances->first()->status === 'alpha' ? 'bg-gray-100 text-gray-800' : '' }}">
-                                                {{ ucfirst($userAttendances->first()->status) }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                                <span
+                                                    class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
+                                                                                                            {{ $attendance->status === 'hadir' ? 'bg-green-100 text-green-800' : '' }}
+                                                                                                            {{ $attendance->status === 'sakit' ? 'bg-red-100 text-red-800' : '' }}
+                                                                                                            {{ $attendance->status === 'izin' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                                                                            {{ $attendance->status === 'tugas_luar' ? 'bg-blue-100 text-blue-800' : '' }}
+                                                                                                            {{ $attendance->status === 'cuti' ? 'bg-purple-100 text-purple-800' : '' }}
+                                                                                                            {{ $attendance->status === 'alpha' ? 'bg-gray-100 text-gray-800' : '' }}">
+                                                    {{ ucfirst($attendance->status) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
                                         <td colspan="5" class="px-3 py-4 text-sm text-gray-500 text-center">
                                             No attendance records found
                                         </td>
                                     </tr>
-                                @endforelse
+                                @endif
+
                             </tbody>
                         </table>
+                        @if($attendances instanceof \Illuminate\Pagination\LengthAwarePaginator && $attendances->hasPages())
+                            <div class="mt-4">
+                                {{ $attendances->links() }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
