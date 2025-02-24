@@ -74,7 +74,7 @@ class CheckLocalServer
         Log::info('Middleware CheckLocalServer is running');
 
         // Ambil dan bersihkan allowed IPs
-        $allowedPublicIp = env('ATTENDANCE_SERVER_PUBLIC', '172.17.0.1');
+        $allowedPublicIp = env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98');
         $allowedIps = array_map('trim', explode(',', $allowedPublicIp)); // Bersihkan spasi
         Log::info("Allowed IPs: " . implode(', ', $allowedIps));
 
