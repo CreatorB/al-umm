@@ -7,6 +7,7 @@ use App\Http\Livewire\Attendances;
 use App\Http\Livewire\Admin;
 use App\Http\Livewire\Admin\Users as AdminUsers;;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 
 // Welcome page
 Route::get('/', function () {
+if (Auth::check()) {
+        return redirect('/dashboard');
+    }
 	return view('welcome');
 });
 

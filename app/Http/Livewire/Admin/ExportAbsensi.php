@@ -15,6 +15,15 @@ class ExportAbsensi extends Component
     public $startDate;
     public $endDate;
 
+    public $search = '';
+    public $selectedDate;
+    public $statusFilter = '';
+    public $perPage = 10;
+    public $sortField = 'check_in';
+    public $sortDirection = 'desc';
+    protected $queryString = ['search', 'selectedDate', 'statusFilter', 'sortField', 'sortDirection'];
+
+
     protected $rules = [
         'startDate' => 'required|date',
         'endDate' => 'required|date|after_or_equal:startDate',
@@ -25,6 +34,7 @@ class ExportAbsensi extends Component
         // Set default date range to current month
         // $this->startDate = now()->startOfMonth()->format('Y-m-d');
         // $this->endDate = now()->endOfMonth()->format('Y-m-d');
+        $this->selectedDate = now()->format('Y-m-d');
     }
 
     private function convertMinutesToTime($minutes)
@@ -635,8 +645,54 @@ class ExportAbsensi extends Component
     //     return response()->download($fileName)->deleteFileAfterSend(true);
     // }
 
+    public function getAttendancesProperty()
+    {
+        return Attendance::query()
+            ->join('users', 'attendances.user_id', '=', 'users.id')
+            ->when($this->selectedDate, function ($query) {
+                $query->whereDate('attendance_date', $this->selectedDate);
+            })
+            ->when($this->statusFilter, function ($query) {
+                $query->where('status', $this->statusFilter);
+            })
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('users.name', 'like', '%' . $this->search . '%')
+                        ->orWhere('users.email', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->select([
+                'users.name',
+                'users.email',
+                'attendances.*',
+                \DB::raw('COUNT(*) OVER(PARTITION BY users.id, attendance_date) as check_count')
+            ])
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->orderBy('users.name')
+            ->get()
+            ->groupBy('user_id');
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
+
+    public function resetFilters()
+    {
+        $this->reset(['search', 'statusFilter']);
+        $this->selectedDate = now()->format('Y-m-d');
+    }
+
     public function render()
     {
-        return view('livewire.admin.export-absen');
+        return view('livewire.admin.export-absen', [
+            'attendances' => $this->attendances
+        ]);
     }
 }
