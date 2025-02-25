@@ -24,7 +24,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     // Public routes
     Route::post('signin', [AuthController::class, 'signin']);
-
+    Route::post('signup', [AuthController::class, 'signup']);
     // Protected routes
     Route::middleware('auth:api')->group(function () {
         Route::post('signout', [AuthController::class, 'signout']);
