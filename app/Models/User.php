@@ -26,6 +26,7 @@ class User extends Authenticatable
         'photo',
         'gender',
         'phone',
+        'schedule_id',
         'api_token',
         'nip',
         'working_days',

@@ -167,12 +167,13 @@ class Edit extends Component
                 'email' => $this->email,
                 'gender' => $this->gender,
                 'phone' => $this->phone,
+                'schedule_id' => $this->userFields['schedule_id'],
             ];
 
             if (!empty($this->password)) {
                 $updateData['password'] = bcrypt($this->password);
             }
-            $this->user->update($updateData);
+            $this->user->update($updateData + $this->userFields);
             // Verify role update permission
             $currentUserRole = auth()->user()->roles()->first()->name;
             $newRole = Role::find($this->role);
