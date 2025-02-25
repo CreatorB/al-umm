@@ -36,6 +36,12 @@ php artisan schedules:update-titles
 Useful commands in development
 
 ```
+// check current links
+php artisan route:list
+php artisan route:list --method=GET
+php artisan route:list --name=user
+php artisan route:list --json
+
 php artisan view:clear && php artisan optimize:clear && rm -rf storage/framework/views/*
 
 // if you have adding new packages, better to run below command again :
