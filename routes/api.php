@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
@@ -38,5 +39,6 @@ Route::prefix('v1')->group(function () {
         // Route::post('attendance/check-in', [AttendanceController::class, 'checkIn']);
         // Route::post('attendance/check-out', [AttendanceController::class, 'checkOut']);
         Route::get('attendance/status', [AttendanceController::class, 'status']);
+        Route::get('announcements/active', [AnnouncementController::class, 'getActive']);
     });
 });

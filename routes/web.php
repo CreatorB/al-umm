@@ -5,9 +5,12 @@ use App\Http\Livewire\Users;
 use App\Http\Livewire\Events;
 use App\Http\Livewire\Attendances;
 use App\Http\Livewire\Admin;
-use App\Http\Livewire\Admin\Users as AdminUsers;;
+use App\Http\Livewire\Admin\Users as AdminUsers;
+;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Livewire\Admin\Announcements\Create;
+use App\Http\Livewire\Admin\Announcements\Edit;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,14 +25,14 @@ use Illuminate\Support\Facades\Auth;
 
 // Welcome page
 Route::get('/', function () {
-if (Auth::check()) {
+    if (Auth::check()) {
         return redirect('/dashboard');
     }
-	return view('welcome');
+    return view('welcome');
 });
 
 // ping
-Route::get('/ping', function() {
+Route::get('/ping', function () {
     return response('pong')
         ->header('Access-Control-Allow-Origin', '*')
         ->header('Access-Control-Allow-Methods', 'GET');
@@ -70,6 +73,9 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->middleware(['check.role.access:hr,admin,superadmin'])->group(function () {
         Route::get('/users/{user}/edit', AdminUsers\Edit::class)
             ->name('admin.users.edit');
+        Route::get('/announcements', \App\Http\Livewire\Admin\Announcements\Index::class)->name('admin.announcements.index');
+        Route::get('/announcements/create', Create::class)->name('admin.announcements.create');
+        Route::get('/announcements/{announcement}/edit', Edit::class)->name('admin.announcements.edit');
     });
 
     // Superadmin routes
