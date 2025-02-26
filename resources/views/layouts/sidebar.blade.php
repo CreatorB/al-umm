@@ -9,6 +9,28 @@
             <x-iconic-home class="w-6 h-6 mr-4 text-gray-300 stroke-current" />Home
         </x-nav-item>
 
+        <!-- Menu Apps -->
+        <x-nav-item no-margin>
+            <div class="flex flex-col text-gray-100">
+                <!-- Parent Menu -->
+                <div class="flex items-center py-1 cursor-pointer" onclick="toggleSubMenu('apps-menu')">
+                    <x-iconic-settings-sliders class="w-6 h-6 mr-4 text-gray-300 stroke-current" />
+                    <span>Apps</span>
+                    <x-iconic-chevron-down id="apps-menu-icon"
+                        class="w-4 h-4 ml-auto transition-transform duration-300 transform" />
+                </div>
+
+                <!-- Submenu Apps -->
+                <ul id="apps-menu" class="hidden pl-8 -mt-3 space-y-0">
+                    <li>
+                        <x-nav-item to="{{ route('admin.announcements.index') }}" class="flex items-center py-1 text-gray-100">
+                            <x-iconic-arrow-right class="w-4 h-4 mr-2 text-gray-300 stroke-current" />Announcements
+                        </x-nav-item>
+                    </li>
+                </ul>
+            </div>
+        </x-nav-item>
+
         <!-- Menu Users -->
         @if (auth()->user()->hasAnyRole(['superadmin', 'admin', 'hr']))
             <x-nav-item to="{{ route('users') }}" class="flex items-center py-2 text-gray-100">
