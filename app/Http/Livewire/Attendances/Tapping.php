@@ -504,22 +504,22 @@ class Tapping extends Component
             ]);
             session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
             return false;
-        }
+        } else {
+            try {
+                $isServerAccessible = NetworkUtils::isLocalServerAccessible();
+                if (!$isServerAccessible) {
+                    Log::warning('Local server not accessible');
+                    session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
+                    return false;
+                }
 
-        try {
-            $isServerAccessible = NetworkUtils::isLocalServerAccessible();
-            if (!$isServerAccessible) {
-                Log::warning('Local server not accessible');
-                session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
+                Log::info('Network validation successful');
+                return true;
+            } catch (\Exception $e) {
+                Log::error('Network validation error: ' . $e->getMessage());
+                session()->flash('error', 'Gagal melakukan validasi jaringan. Silakan coba lagi.');
                 return false;
             }
-
-            Log::info('Network validation successful');
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Network validation error: ' . $e->getMessage());
-            session()->flash('error', 'Gagal melakukan validasi jaringan. Silakan coba lagi.');
-            return false;
         }
     }
 
