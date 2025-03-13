@@ -522,6 +522,8 @@ class Tapping extends Component
                 session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
                 return false;
             }
+            Log::info('Network validation successful');
+            return true;
         }
     }
 
