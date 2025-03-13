@@ -489,37 +489,41 @@ class Tapping extends Component
     }
     public function validateNetwork()
     {
-
+        $checkEnv = env('APP_ENV', 'local');
         Log::info('Network Validation Started', [
             'isInNetwork' => $this->isInNetwork,
             'deviceInfo' => $this->deviceInfo,
-            'pingTime' => $this->pingTime
+            'pingTime' => $this->pingTime,
+            'checkEnv' => $checkEnv
         ]);
+        if ($checkEnv === 'local') {
+            try {
+                $isServerAccessible = NetworkUtils::isLocalServerAccessible();
+                if (!$isServerAccessible) {
+                    Log::warning('Local server not accessible');
+                    session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
+                    return false;
+                }
 
-        if (!$this->isInNetwork) {
-            $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info available';
-            Log::warning('Network validation failed', [
-                'device_info' => $deviceDetails,
-                'isInNetwork' => $this->isInNetwork
-            ]);
-            session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
-            return false;
-        }
-
-        try {
-            $isServerAccessible = NetworkUtils::isLocalServerAccessible();
-            if (!$isServerAccessible) {
-                Log::warning('Local server not accessible');
+                Log::info('Network validation successful');
+                return true;
+            } catch (\Exception $e) {
+                Log::error('Network validation error: ' . $e->getMessage());
+                session()->flash('error', 'Gagal melakukan validasi jaringan. Silakan coba lagi.');
+                return false;
+            }
+        } else {
+            if (!$this->isInNetwork) {
+                $deviceDetails = $this->deviceInfo ? json_encode($this->deviceInfo) : 'No device info available';
+                Log::warning('Network validation failed', [
+                    'device_info' => $deviceDetails,
+                    'isInNetwork' => $this->isInNetwork
+                ]);
                 session()->flash('error', 'Afwan, absen hanya bisa menggunakan jaringan Wi-Fi / LAN Mahad Syathiby.');
                 return false;
             }
-
             Log::info('Network validation successful');
             return true;
-        } catch (\Exception $e) {
-            Log::error('Network validation error: ' . $e->getMessage());
-            session()->flash('error', 'Gagal melakukan validasi jaringan. Silakan coba lagi.');
-            return false;
         }
     }
 

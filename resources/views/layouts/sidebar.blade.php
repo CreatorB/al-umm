@@ -10,6 +10,7 @@
         </x-nav-item>
 
         <!-- Menu Apps -->
+        @if (auth()->user()->hasAnyRole(['superadmin']))
         <x-nav-item no-margin>
             <div class="flex flex-col text-gray-100">
                 <!-- Parent Menu -->
@@ -30,6 +31,7 @@
                 </ul>
             </div>
         </x-nav-item>
+        @endif
 
         <!-- Menu Users -->
         @if (auth()->user()->hasAnyRole(['superadmin', 'admin', 'hr']))
