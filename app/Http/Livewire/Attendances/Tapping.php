@@ -55,10 +55,26 @@ class Tapping extends Component
 
     private function loadTodayAttendance()
     {
+        // Cari absensi hari ini dulu
         $this->todayAttendance = Attendance::where('user_id', Auth::id())
             ->whereDate('attendance_date', Carbon::today())
             ->latest()
             ->first();
+
+        // Jika tidak ada absensi hari ini atau ada tetapi sudah checkout,
+        // cek apakah ada absensi lama yang belum checkout
+        if (!$this->todayAttendance || ($this->todayAttendance && $this->todayAttendance->check_out)) {
+            $incompleteAttendance = Attendance::where('user_id', Auth::id())
+                ->whereNotNull('check_in')
+                ->whereNull('check_out')
+                ->latest()
+                ->first();
+
+            // Jika ada, gunakan ini sebagai absensi yang aktif
+            if ($incompleteAttendance) {
+                $this->todayAttendance = $incompleteAttendance;
+            }
+        }
     }
 
     private function getUserLocation()
@@ -159,22 +175,37 @@ class Tapping extends Component
     // }
     private function checkAttendanceStatus()
     {
-        if (!$this->todayAttendance) {
-            $this->canCheckIn = true;
-            $this->canCheckOut = false;
-            return;
-        }
+        // Cek apakah ada absensi yang belum checkout (dari kapanpun)
+        $incompleteAttendance = Attendance::where('user_id', Auth::id())
+            ->whereNotNull('check_in')
+            ->whereNull('check_out')
+            ->latest()
+            ->first();
 
-        if ($this->todayAttendance->check_in && !$this->todayAttendance->check_out) {
+        if ($incompleteAttendance) {
             $this->canCheckIn = false;
             $this->canCheckOut = true;
             return;
         }
 
-        if ($this->todayAttendance->shift < 10) {
+        // Jika tidak ada absensi yang belum checkout, baru cek hari ini
+        $todayAttendance = Attendance::where('user_id', Auth::id())
+            ->whereDate('attendance_date', Carbon::today())
+            ->whereNotNull('check_in')
+            ->whereNotNull('check_out')
+            ->latest()
+            ->first();
+
+        if (!$todayAttendance) {
+            // Tidak ada absensi hari ini atau ada tetapi belum check-in
+            $this->canCheckIn = true;
+            $this->canCheckOut = false;
+        } else if ($todayAttendance->shift < 10) {
+            // Jika jumlah shift masih di bawah batas
             $this->canCheckIn = true;
             $this->canCheckOut = false;
         } else {
+            // Jika sudah mencapai batas shift
             $this->canCheckIn = false;
             $this->canCheckOut = false;
             session()->flash('error', 'You have already completed all shifts for today.');

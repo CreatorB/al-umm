@@ -18,7 +18,7 @@
                 <span class="block sm:inline">{{ session('error') }}</span>
             </div>
         @endif
-        
+
         @if (session()->has('success'))
             <div class="relative px-4 py-3 mb-4 text-green-700 bg-green-100 border border-green-400 rounded alert-success">
                 <strong class="font-bold">Success!</strong>
@@ -53,7 +53,21 @@
 
         @if ($todayAttendance)
             <div class="p-6 mb-6 bg-white rounded-lg shadow-md">
-                <h2 class="mb-4 text-xl font-semibold text-gray-800">Today's Attendance</h2>
+                <h2 class="mb-4 text-xl font-semibold text-gray-800">
+                    @if($todayAttendance->attendance_date->isToday())
+                        Today's Attendance
+                    @else
+                        Incomplete Attendance from {{ $todayAttendance->attendance_date->format('d M Y') }}
+                    @endif
+                </h2>
+                @if(!$todayAttendance->attendance_date->isToday())
+                    <div class="p-3 mb-4 text-yellow-700 bg-yellow-100 border border-yellow-400 rounded">
+                        <strong class="font-bold">Perhatian!</strong>
+                        <span class="block sm:inline">Anda memiliki absensi tanggal
+                            {{ $todayAttendance->attendance_date->format('d M Y') }} yang belum di-checkout. Silakan checkout
+                            terlebih dahulu.</span>
+                    </div>
+                @endif
                 <div class="space-y-3">
                     <div class="flex items-center justify-between pb-2 border-b">
                         <span class="text-gray-600">Check In:</span>
@@ -61,14 +75,14 @@
                             {{ $todayAttendance->check_in ? $todayAttendance->check_in->format('H:i:s') : 'Not yet' }}
                         </span>
                     </div>
-                    
+
                     <div class="flex items-center justify-between pb-2 border-b">
                         <span class="text-gray-600">Check Out:</span>
                         <span class="font-medium text-gray-800">
                             {{ $todayAttendance->check_out ? $todayAttendance->check_out->format('H:i:s') : 'Not yet' }}
                         </span>
                     </div>
-                    
+
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Status:</span>
                         <div class="flex items-center space-x-2">
@@ -77,7 +91,8 @@
                                 <span class="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">Late</span>
                             @endif
                             @if ($todayAttendance->is_overtime)
-                                <span class="px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 rounded-full">Overtime</span>
+                                <span
+                                    class="px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 rounded-full">Overtime</span>
                             @endif
                         </div>
                     </div>
@@ -175,7 +190,7 @@
                         reject(new Error(errorMessage));
                     };
 
-                    xhr.onreadystatechange = function() {
+                    xhr.onreadystatechange = function () {
                         if (xhr.readyState === 4) {
                             const endTime = new Date().getTime();
                             const pingTime = endTime - startTime;
@@ -191,7 +206,7 @@
                         }
                     };
 
-                    xhr.onerror = function() {
+                    xhr.onerror = function () {
                         const endTime = new Date().getTime();
                         const pingTime = endTime - startTime;
                         console.log('Local server reachable (CORS response):', {
@@ -224,7 +239,8 @@
             });
         }
     </script>
-    {{-- <script>
+    {{--
+    <script>
         Livewire.on('requestBrowserLocation', () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -242,7 +258,7 @@
             }
         });
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
+            navigator.geolocation.getCurrentPosition(function (position) {
                 @this.set('latitude', position.coords.latitude);
                 @this.set('longitude', position.coords.longitude);
             });
