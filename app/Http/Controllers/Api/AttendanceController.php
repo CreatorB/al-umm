@@ -29,6 +29,24 @@ class AttendanceController extends Controller
             // if (!NetworkUtils::isLocalServerAccessible()) {
             //     return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
             // }
+            $user = auth()->user();
+
+            $incompleteAttendance = Attendance::where('user_id', $user->id)
+
+                ->whereNotNull('check_in')
+
+                ->whereNull('check_out')
+
+                ->latest()
+
+                ->first();
+
+
+
+            if ($incompleteAttendance) {
+
+                return $this->errorResponse('Anda memiliki absensi tanggal ' . Carbon::parse($incompleteAttendance->attendance_date)->format('d M Y') . ' yang belum di-checkout. Silakan checkout terlebih dahulu.', 400);
+            }
 
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
@@ -39,7 +57,6 @@ class AttendanceController extends Controller
             Log::info("Device info checkIn: " . $validated['device_info']);
 
             $today = Carbon::now()->toDateString();
-            $user = auth()->user();
 
             // Check distance
             $distance = $this->isWithinRange($validated['latitude'], $validated['longitude']);
@@ -92,56 +109,54 @@ class AttendanceController extends Controller
     public function checkOut(Request $request)
     {
         try {
-            // if (!NetworkUtils::isLocalServerAccessible()) {
-            //     return $this->errorResponse('Absensi hanya bisa dilakukan dalam jaringan kantor.', 403);
-            // }
-
             $validated = $request->validate([
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
                 'device_info' => 'required',
             ]);
-
             Log::info("Device info checkOut: " . $validated['device_info']);
 
-            $today = Carbon::now()->toDateString();
             $user = auth()->user();
 
-            // Check distance
             $distance = $this->isWithinRange($validated['latitude'], $validated['longitude']);
             if ($distance > $this->maxDistance) {
                 return $this->errorResponse('You are not within allowed range', 400);
             }
 
-            $lastAttendance = Attendance::where('user_id', $user->id)
-                ->whereDate('attendance_date', $today)
+            $incompleteAttendance = Attendance::where('user_id', $user->id)
+                ->whereNotNull('check_in')
                 ->whereNull('check_out')
-                ->latest()
+                ->orderBy('attendance_date', 'desc')
                 ->first();
 
-            if (!$lastAttendance) {
+            if (!$incompleteAttendance) {
+                $today = Carbon::now()->toDateString();
+                $incompleteAttendance = Attendance::where('user_id', $user->id)
+                    ->whereDate('attendance_date', $today)
+                    ->whereNull('check_out')
+                    ->latest()
+                    ->first();
+            }
+
+            if (!$incompleteAttendance) {
                 return $this->errorResponse('No active check-in found', 404);
             }
 
-            // Check time against schedule
             $schedule = $user->schedule;
-            $todayDay = strtolower(Carbon::now()->format('l'));
-            $endTime = $schedule->{"{$todayDay}_end"};
-            $checkOutTime = Carbon::now()->format('H:i:s');
-            $detectedDevice = 'Unknown';
-            if ($validated['device_info']) {
-                $detectedDevice = $validated['device_info'];
-            }
+            $attendanceDay = strtolower(Carbon::parse($incompleteAttendance->attendance_date)->format('l'));
+            $endTime = $schedule->{"{$attendanceDay}_end"};
 
-            $lastAttendance->update([
+            $checkOutTime = Carbon::now()->format('H:i:s');
+            $detectedDevice = $validated['device_info'] ?? 'Unknown';
+
+            $incompleteAttendance->update([
                 'check_out' => Carbon::now(),
                 'check_out_location' => "{$detectedDevice},lat: {$validated['latitude']}, long: {$validated['longitude']}",
                 'early_leave' => $endTime && $checkOutTime < $endTime,
                 'is_overtime' => $endTime && $checkOutTime > $endTime
             ]);
 
-            return $this->successResponse($lastAttendance, 'Successfully checked out');
-
+            return $this->successResponse($incompleteAttendance, 'Successfully checked out');
         } catch (\Exception $e) {
             Log::error('Check Out Error: ' . $e->getMessage());
             return $this->errorResponse('Failed to check out : ' . $e->getMessage(), 400);
@@ -153,30 +168,95 @@ class AttendanceController extends Controller
         try {
             $user = auth()->user();
             $today = Carbon::now()->toDateString();
+            $yesterday = Carbon::yesterday()->toDateString();
+
+            // Log::info('Status Check: User ID: ' . $user->id);
+            // Log::info('Status Check: Today: ' . $today);
+            // Log::info('Status Check: Yesterday: ' . $yesterday);
+
+            $yesterdayIncomplete = Attendance::where('user_id', $user->id)
+                ->whereDate('attendance_date', $yesterday)
+                ->whereNotNull('check_in')
+                ->whereNull('check_out')
+                ->first();
+
+            // Log::info('Yesterday Incomplete Query: ' .
+            //     Attendance::where('user_id', $user->id)
+            //         ->whereDate('attendance_date', $yesterday)
+            //         ->whereNotNull('check_in')
+            //         ->whereNull('check_out')
+            //         ->toSql());
+            // Log::info('Yesterday Incomplete Result: ' . json_encode($yesterdayIncomplete));
+
+            $anyIncomplete = Attendance::where('user_id', $user->id)
+                ->where('attendance_date', '<', $today)
+                ->whereNotNull('check_in')
+                ->whereNull('check_out')
+                ->orderBy('attendance_date', 'desc')
+                ->first();
+
+            // Log::info('Any Incomplete Result: ' . json_encode($anyIncomplete));
 
             $todayAttendance = Attendance::where('user_id', $user->id)
                 ->whereDate('attendance_date', $today)
                 ->latest()
                 ->first();
 
-            $canCheckIn = !$todayAttendance ||
-                ($todayAttendance->check_in && $todayAttendance->check_out && $todayAttendance->shift < 10);
+            $hasIncompleteAttendance = $yesterdayIncomplete || $anyIncomplete;
 
-            $canCheckOut = $todayAttendance &&
-                $todayAttendance->check_in &&
-                !$todayAttendance->check_out;
+            $canCheckIn = !$hasIncompleteAttendance &&
+                (!$todayAttendance ||
+                    ($todayAttendance->check_in && $todayAttendance->check_out && $todayAttendance->shift < 10));
+
+            $canCheckOut = $hasIncompleteAttendance ||
+                ($todayAttendance && $todayAttendance->check_in && !$todayAttendance->check_out);
+
+            $incompleteRecord = $yesterdayIncomplete ?? $anyIncomplete;
 
             return $this->successResponse([
                 'can_check_in' => $canCheckIn,
                 'can_check_out' => $canCheckOut,
-                'today_attendance' => $todayAttendance
+                'today_attendance' => $todayAttendance,
+                'yesterday_incomplete' => $incompleteRecord ? [
+                    'date' => $incompleteRecord->attendance_date,
+                    'check_in' => $incompleteRecord->check_in
+                ] : null
             ]);
-
         } catch (\Exception $e) {
             Log::error('Status Check Error: ' . $e->getMessage());
             return $this->errorResponse('Failed to get status', 400);
         }
     }
+
+    // public function status()
+    // {
+    //     try {
+    //         $user = auth()->user();
+    //         $today = Carbon::now()->toDateString();
+
+    //         $todayAttendance = Attendance::where('user_id', $user->id)
+    //             ->whereDate('attendance_date', $today)
+    //             ->latest()
+    //             ->first();
+
+    //         $canCheckIn = !$todayAttendance ||
+    //             ($todayAttendance->check_in && $todayAttendance->check_out && $todayAttendance->shift < 10);
+
+    //         $canCheckOut = $todayAttendance &&
+    //             $todayAttendance->check_in &&
+    //             !$todayAttendance->check_out;
+
+    //         return $this->successResponse([
+    //             'can_check_in' => $canCheckIn,
+    //             'can_check_out' => $canCheckOut,
+    //             'today_attendance' => $todayAttendance
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Status Check Error: ' . $e->getMessage());
+    //         return $this->errorResponse('Failed to get status', 400);
+    //     }
+    // }
 
     private function isWithinRange($latitude, $longitude)
     {

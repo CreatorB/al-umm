@@ -69,14 +69,77 @@ class CheckLocalServer
 
     //     return $next($request);
     // }
+
+    // public function handle($request, Closure $next)
+    // {
+    //     Log::info('Middleware CheckLocalServer is running');
+
+    //     // Ambil dan bersihkan allowed IPs
+    //     // $allowedPublicIp = env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98');
+    //     $allowedPublicIp = (env('APP_ENV') === 'local' || empty(env('APP_ENV'))) ? env('LOCAL_IP', '172.17.0.1') : env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98');
+    //     $allowedIps = array_map('trim', explode(',', $allowedPublicIp)); // Bersihkan spasi
+    //     Log::info("Allowed IPs: " . implode(', ', $allowedIps));
+
+    //     if (empty($allowedIps)) {
+    //         Log::warning("No allowed IPs configured");
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No allowed IPs configured.'
+    //         ], 403);
+    //     }
+
+    //     // Ambil client IP
+    //     $deviceInfo = $request->input('device_info');
+    //     $clientIp = null;
+
+    //     if ($deviceInfo) {
+    //         Log::info("Received device_info: {$deviceInfo}");
+
+    //         if (is_string($deviceInfo) && strpos($deviceInfo, 'ipAddress:') !== false) {
+    //             preg_match('/ipAddress:\s*([^,]+)/', $deviceInfo, $matches);
+    //             if (isset($matches[1])) {
+    //                 $clientIp = trim($matches[1]);
+    //                 Log::info("Client IP from device_info: {$clientIp}");
+    //             }
+    //         } elseif (is_array($deviceInfo) && isset($deviceInfo['ipAddress'])) {
+    //             $clientIp = trim($deviceInfo['ipAddress']);
+    //             Log::info("Client IP from device_info: {$clientIp}");
+    //         }
+    //     }
+
+    //     if (!$clientIp) {
+    //         $clientIp = $request->ip();
+    //         Log::info("Fallback to client IP from request: {$clientIp}");
+    //     }
+
+    //     $clientIp = trim($clientIp);
+    //     Log::info("Final Client IP: {$clientIp}");
+
+    //     // Periksa apakah IP diizinkan
+    //     $isAllowed = in_array($clientIp, $allowedIps);
+
+    //     if (!$isAllowed) {
+    //         Log::warning("Unauthorized IP: {$clientIp}");
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Afwan, Absen hanya bisa dilakukan dalam jaringan Wi-Fi / LAN Mahad Syathiby.'
+    //             ], 403);
+    //         }
+    //         return abort(403, 'Afwan, Absen hanya bisa dilakukan dalam jaringan Wi-Fi / LAN Mahad Syathiby.');
+    //     }
+
+    //     return $next($request);
+    // }
     public function handle($request, Closure $next)
     {
         Log::info('Middleware CheckLocalServer is running');
 
-        // Ambil dan bersihkan allowed IPs
-        // $allowedPublicIp = env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98');
-        $allowedPublicIp = (env('APP_ENV') === 'local' || empty(env('APP_ENV'))) ? env('LOCAL_IP', '172.17.0.1') : env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98');
-        $allowedIps = array_map('trim', explode(',', $allowedPublicIp)); // Bersihkan spasi
+        // Daftar IP yang diizinkan berdasarkan environment
+        $allowedIps = (env('APP_ENV') === 'local' || empty(env('APP_ENV')))
+            ? array_filter(array_map('trim', explode(',', env('LOCAL_IPS', '172.17.0.1,103.178.146.98'))))
+            : array_filter(array_map('trim', explode(',', env('ATTENDANCE_SERVER_PUBLIC', '103.178.146.98'))));
+
         Log::info("Allowed IPs: " . implode(', ', $allowedIps));
 
         if (empty($allowedIps)) {
