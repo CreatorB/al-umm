@@ -33,12 +33,12 @@ public function getActive(Request $request)
 
         $announcements = $query->get();
 
-        Log::debug('Query debug:', [
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings(),
-            'result_count' => $announcements->count(),
-            'results' => $announcements->toArray()
-        ]);
+        // Log::debug('Query debug:', [
+        //     'sql' => $query->toSql(),
+        //     'bindings' => $query->getBindings(),
+        //     'result_count' => $announcements->count(),
+        //     'results' => $announcements->toArray()
+        // ]);
 
         return $this->successResponse($announcements, 'Successfully fetched');
     } catch (\Exception $e) {
